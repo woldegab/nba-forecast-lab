@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import GameCard, { Logo } from './GameCard';
+import GameCard, { Logo, Preview } from './GameCard';
 import Court from './Court';
 import { GameSkeletons, Loading } from './Skeleton';
 import { getData } from '../services/nbaApi';
@@ -63,6 +63,7 @@ function FeaturedGame({ game }) {
       <span style={{ flexGrow: game.away_win_probability, background: away.color }} />
       <span style={{ flexGrow: game.home_win_probability, background: home.color }} />
     </div>
+    <Preview preview={game.preview} />
   </article>;
 }
 

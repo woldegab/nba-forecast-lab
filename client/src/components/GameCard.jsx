@@ -27,6 +27,14 @@ function TeamLine({ abbreviation, probability, score, favorite, winner, reveal, 
 
 export { Logo };
 
+// A short plain-English preview saved with the forecast (backend/previews.py).
+export function Preview({ preview }) {
+  if (!preview) return null;
+  return <p className="preview">{preview.text}
+    {preview.source === 'ai' && <span className="preview-tag" title="Written by an AI model from this site's numbers, then checked automatically: every number must match, and no injury or betting talk.">AI-written, fact-checked</span>}
+  </p>;
+}
+
 // The forecast's edge in Elo points, compared with the ratings plus home court, shows
 // whether a back-to-back penalty was applied (stored ratings don't include it).
 function restAdjustment(game) {
@@ -72,6 +80,7 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
       <span style={{ flexGrow: grown ? game.away_win_probability : 0.5, background: away.color }} />
       <span style={{ flexGrow: grown ? game.home_win_probability : 0.5, background: home.color }} />
     </div>
+    {!final && <Preview preview={game.preview} />}
     <div className="game-actions">
       <details>
         <summary>Why this forecast</summary>

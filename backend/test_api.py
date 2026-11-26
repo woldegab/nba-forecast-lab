@@ -132,6 +132,14 @@ class LiveAndStaticTests(unittest.TestCase):
             self.assertEqual(change['back_to_back'], 50.0)
             self.assertEqual(len(client.get('/api/teams').json()['teams']), 2)
 
+    def test_previews_attached_to_games(self):
+        (self.live / 'previews_2026-27.json').write_text(json.dumps({'2': dict(
+            headline='AAA at BBB', preview='The model gives the AAA a 65% chance.', source='ai')}))
+        with self.client() as client:
+            game = client.get('/api/live').json()['upcoming'][0]
+            self.assertEqual(game['preview']['source'], 'ai')
+            self.assertIsNone(client.get('/api/live/day?date=2026-11-25').json()['games'][0]['preview'])
+
     def test_missing_live_files_return_503(self):
         with self.client(self.path / 'nothing') as client:
             self.assertEqual(client.get('/api/live').status_code, 503)

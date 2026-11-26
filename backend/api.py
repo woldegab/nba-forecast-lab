@@ -125,10 +125,7 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
 
     @app.get("/api/live")
     def live(recent: int = Query(40, ge=0, le=200)):
-        try:
-            summary, games = load_live(Path(live_dir))
-        except (OSError, ValueError, KeyError, TypeError):
-            raise HTTPException(503, "Live forecasts are not available yet. Run backend/live_forecast.py update.")
+        summary, games = live_games()
         upcoming = [g for g in games if g["home_score"] is None]
         finished = [g for g in games if g["home_score"] is not None and g["mode"] == "live"]
         return dict(summary=summary, upcoming=upcoming, recent=finished[-recent:][::-1] if recent else [],
@@ -146,9 +143,20 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
         return dict(since=start["generated_at"], margin_of_victory=current["margin_of_victory"],
                     back_to_back=current["back_to_back"])
 
+    def with_previews(summary, games):
+        """Attach saved plain-English previews (backend/previews.py) to their games."""
+        try:
+            saved = json.loads((Path(live_dir) / f"previews_{summary['season']}.json").read_text())
+        except (OSError, ValueError):
+            saved = {}
+        for g in games:
+            p = saved.get(g["game_id"])
+            g["preview"] = dict(headline=p["headline"], text=p["preview"], source=p["source"]) if p else None
+        return summary, games
+
     def live_games():
         try:
-            return load_live(Path(live_dir))
+            return with_previews(*load_live(Path(live_dir)))
         except (OSError, ValueError, KeyError, TypeError):
             raise HTTPException(503, "Live forecasts are not available yet. Run backend/live_forecast.py update.")
 

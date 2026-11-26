@@ -28,6 +28,12 @@ jobs:
       - run: pip install -r backend/requirements.txt
       - name: Record results and today's forecasts
         run: python backend/live_forecast.py update
+      # Free Gemini API key in repo secrets (optional). Without it, or if the API
+      # is unavailable, every game gets a template preview and the job still passes.
+      - name: Write game previews
+        run: python backend/previews.py update
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Commit the ledger
         run: |
           git config user.name "github-actions[bot]"

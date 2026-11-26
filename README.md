@@ -74,6 +74,27 @@ Docker image serves both. GitHub Actions runs the tests on every push and the fo
 morning. The rating and calibration charts are hand-written SVG, and Pillow draws the
 link-preview image at each deploy.
 
+## AI game previews
+
+Each game on the Today page has a short plain-English preview. `backend/previews.py` builds
+the facts for a game (win chance, record, last 10, streak, back-to-back) from earlier games
+only, asks an LLM (Google's Gemini API, free tier) to write two or three sentences from
+those facts, and checks the result before saving it:
+
+- every number in the text must appear in the facts, and percentages must be the win chances
+- both teams are named, the favorite is named, and the underdog is never called the favorite
+- no injury or betting talk, and length limits
+
+A preview that fails is retried once, then replaced by a plain template, so the site never
+shows unchecked AI text. Previews are saved next to the forecasts and never rewritten.
+
+```sh
+GEMINI_API_KEY=... python backend/previews.py update   # today's previews (templates without a key)
+GEMINI_API_KEY=... python backend/previews.py eval     # pass rate on 30 recent games -> backend/PREVIEW_EVAL.md
+```
+
+The daily workflow reads the key from the `GEMINI_API_KEY` repository secret.
+
 ## Run it locally
 
 Requires Python 3.10+ and Node 20.19+ (or 22.12+).
