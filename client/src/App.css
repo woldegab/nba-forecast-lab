@@ -269,6 +269,8 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 
 /* ---------- small screens ---------- */
 @media (max-width: 760px) {
+  .theme-toggle { position: absolute; top: 14px; right: 20px; }
+  .header { position: relative !important; }
   .header { position: static; flex-direction: column; align-items: flex-start; height: auto; gap: 8px; padding-top: 16px; padding-bottom: 8px; }
   .toolbar.sticky { position: static; border-bottom: 0; }
   .toolbar.sticky .search { max-width: none; flex-basis: 100%; }
@@ -390,16 +392,31 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .legend.live::before { border-color: var(--brand); }
 
 /* ---------- dark mode, following the device setting ---------- */
+/* Dark colors: used when the device is in dark mode, unless the visitor picked light,
+   or whenever the visitor picked dark with the header button. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --text: #f2f2f2; --text-2: #a3a3a8; --line: #2a2b30; --line-strong: #3a3b41; --surface: #222327; --bg: #17181b;
     --brand: #ff7a33; --hit: #4cc38a; --miss: #ff6b5e;
     --on-text: #17181b; --raised: #2c2d32; --tint: #17181b; --photo: #222327; --off: #5c5d63;
     --hit-bg: #15362a; --miss-bg: #3d1f1c; --shadow: rgba(0, 0, 0, .4);
   }
-  .logo { background: #f4f4f4; color: color-mix(in srgb, var(--team, #222222) 85%, #000000); } /* team logos are drawn for light backgrounds */
-  .photo-watermark { opacity: .18; }
 }
+:root[data-theme='dark'] {
+    --text: #f2f2f2; --text-2: #a3a3a8; --line: #2a2b30; --line-strong: #3a3b41; --surface: #222327; --bg: #17181b;
+    --brand: #ff7a33; --hit: #4cc38a; --miss: #ff6b5e;
+    --on-text: #17181b; --raised: #2c2d32; --tint: #17181b; --photo: #222327; --off: #5c5d63;
+    --hit-bg: #15362a; --miss-bg: #3d1f1c; --shadow: rgba(0, 0, 0, .4);
+}
+:root[data-theme='light'] { color-scheme: light; }
+:root[data-theme='dark'] { color-scheme: dark; }
+/* team logos are drawn for light backgrounds, so keep their discs light */
+.dark-ui .logo { background: #f4f4f4; color: color-mix(in srgb, var(--team, #222222) 85%, #000000); }
+.dark-ui .photo-watermark { opacity: .18; }
+
+.theme-toggle { margin-left: auto; flex: none; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--bg); display: grid; place-items: center; padding: 0; }
+.theme-toggle:hover { border-color: var(--text); }
+.theme-toggle svg { width: 20px; height: 20px; fill: none; stroke: var(--text); stroke-width: 2; stroke-linecap: round; }
 
 @media (max-width: 760px) {
   .chart-scroll { overflow-x: auto; }

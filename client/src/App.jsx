@@ -15,6 +15,38 @@ const dateLabel = (date, options = { weekday: 'long', month: 'long', day: 'numer
 const record = (accuracy, games) => { const wins = Math.round(accuracy * games); return `${wins.toLocaleString()}–${(games - wins).toLocaleString()}`; };
 const views = [['tonight', 'Today'], ['teams', 'Teams'], ['archive', 'Past seasons'], ['players', 'Players'], ['model', 'How it works']];
 
+function currentTheme() {
+  const chosen = document.documentElement.dataset.theme;
+  if (chosen) return chosen;
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+// Follows the device setting until the visitor picks one; the pick is remembered.
+function ThemeToggle() {
+  const [theme, setTheme] = useState(currentTheme);
+  useEffect(() => {
+    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+    const follow = () => { if (!document.documentElement.dataset.theme) setTheme(currentTheme()); };
+    media?.addEventListener('change', follow);
+    return () => media?.removeEventListener('change', follow);
+  }, []);
+  useEffect(() => {
+    document.body.classList.toggle('dark-ui', theme === 'dark');
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => { meta.content = theme === 'dark' ? '#17181b' : '#ffffff'; });
+  }, [theme]);
+  const flip = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch { /* private browsing: just don't remember */ }
+    setTheme(next);
+  };
+  return <button className="theme-toggle" onClick={flip} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+    {theme === 'dark'
+      ? <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+      : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" /></svg>}
+  </button>;
+}
+
 function Retry({ message, onRetry }) {
   return <div className="notice" role="alert"><p>{message}</p><button className="pill" onClick={onRetry}>Try again</button></div>;
 }
@@ -172,6 +204,7 @@ export default function App() {
         Forecast Lab
       </button>
       <nav className="nav" aria-label="Main">{views.map(([id, label]) => <button key={id} aria-current={view === id ? 'page' : undefined} onClick={() => setView(id)}>{label}</button>)}</nav>
+      <ThemeToggle />
     </header>
     <main id="main" className="main">
       {view === 'tonight' && <Tonight onArchive={() => setView('archive')} />}
