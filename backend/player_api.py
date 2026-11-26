@@ -6,10 +6,18 @@ import sqlite3
 from fastapi import APIRouter, HTTPException
 from typing import Literal
 from import_games import DEFAULT_DB
+from import_careers import CURRENT_DB
 from points_api import projection
 
 
-def player_router(database=DEFAULT_DB):
+def _has(db, schema, table):
+    return db.execute(f"SELECT 1 FROM {schema}.sqlite_master WHERE name=?", (table,)).fetchone() is not None
+
+
+def player_router(database=DEFAULT_DB, current=CURRENT_DB):
+    """Player pages read the archive plus the small current-season file (this season's
+    games and career stats), which a daily job refreshes. If a season is in both,
+    the current file wins."""
     router = APIRouter()
 
     @contextmanager
@@ -19,11 +27,32 @@ def player_router(database=DEFAULT_DB):
         db = sqlite3.connect(f'{Path(database).resolve().as_uri()}?mode=ro', uri=True)
         db.row_factory = sqlite3.Row
         try:
-            if not db.execute("SELECT 1 FROM sqlite_master WHERE name='player_games'").fetchone():
+            if Path(current).exists():
+                db.execute('ATTACH DATABASE ? AS cur', (f'{Path(current).resolve().as_uri()}?mode=ro',))
+                if _has(db, 'cur', 'player_games'):
+                    archive = ('SELECT * FROM main.player_games WHERE season NOT IN '
+                               '(SELECT DISTINCT season FROM cur.player_games) UNION ALL '
+                               if _has(db, 'main', 'player_games') else '')
+                    db.execute(f'CREATE TEMP VIEW player_games AS {archive}SELECT * FROM cur.player_games')
+            if not db.execute("SELECT 1 FROM sqlite_temp_master WHERE name='player_games' "
+                              "UNION SELECT 1 FROM main.sqlite_master WHERE name='player_games'").fetchone():
                 raise HTTPException(503, 'Import player logs with backend/import_players.py first.')
             yield db
         finally:
             db.close()
+
+    def career(db, player_id):
+        if not Path(current).exists() or not _has(db, 'cur', 'player_careers'):
+            return None
+        total = db.execute('SELECT * FROM cur.player_careers WHERE player_id=?', (player_id,)).fetchone()
+        if not total or not total['gp']:
+            return None
+        per_game = lambda row: {f: row[f] / row['gp'] if row['gp'] else None
+                                for f in ('points', 'rebounds', 'assists', 'minutes')}
+        seasons = [dict(season=r['season'], teams=r['teams'], games=r['gp'], **per_game(r)) for r in db.execute(
+            'SELECT * FROM cur.player_seasons WHERE player_id=? ORDER BY season DESC', (player_id,))]
+        return dict(games=total['gp'], first_season=total['first_season'], last_season=total['last_season'],
+                    updated_at=total['updated_at'], averages=per_game(total), seasons=seasons)
 
     @router.get('/api/players')
     def players(season: str | None = None, window: Literal['5', '10', 'season'] = '10'):
@@ -52,7 +81,8 @@ def player_router(database=DEFAULT_DB):
                 raise HTTPException(404, 'No appearances found for this player and season')
             return dict(player_id=player_id, name=rows[0]['player_name'], team=rows[0]['team'],
                 season=season, window=window, games=rows, sample_games=len(rows),
-                averages={field: sum(row[field] for row in rows)/len(rows) for field in ('points','rebounds','assists','minutes')})
+                averages={field: sum(row[field] for row in rows)/len(rows) for field in ('points','rebounds','assists','minutes')},
+                career=career(db, player_id))
 
     def matchup_game(db, game_id):
         if not db.execute("SELECT 1 FROM sqlite_master WHERE name='games'").fetchone():

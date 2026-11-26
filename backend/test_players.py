@@ -5,6 +5,7 @@ import unittest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from import_players import normalize, store
+import import_careers
 from player_api import player_router
 
 
@@ -18,7 +19,7 @@ class PlayerTests(unittest.TestCase):
             MATCHUP='BOS vs. NYK', WL='W', MIN=30, PTS=i, REB=5, AST=4) for i in range(1, 13)]
         store(normalize(self.rows, '2025-26'), self.db)
         app = FastAPI()
-        app.include_router(player_router(self.db))
+        app.include_router(player_router(self.db, Path(self.temp.name) / 'current.sqlite3'))
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
 
@@ -101,6 +102,65 @@ class PlayerTests(unittest.TestCase):
     def test_missing_player_or_season(self):
         self.assertEqual(self.client.get('/api/players/999?season=2025-26').status_code,404)
         self.assertEqual(self.client.get('/api/players?season=2000-01').status_code,404)
+
+
+def career_data(rows, career):
+    # Same shape as PlayerCareerStats.get_normalized_dict() (checked against player 2544).
+    keys = ('SEASON_ID', 'TEAM_ABBREVIATION', 'GP', 'MIN', 'PTS', 'REB', 'AST')
+    return dict(SeasonTotalsRegularSeason=[dict(zip(keys, r), PLAYER_ID=1) for r in rows],
+                CareerTotalsRegularSeason=[dict(zip(keys[2:], career), PLAYER_ID=1)] if career else [])
+
+
+class CareerTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        folder = Path(self.temp.name)
+        self.archive, self.current = folder / 'nba.sqlite3', folder / 'current.sqlite3'
+        row = lambda season, game, pts: dict(SEASON_ID='2' + season[:4], GAME_ID=game, PLAYER_ID=1,
+            GAME_DATE='2026-01-01' if season == '2025-26' else '2026-11-01', PLAYER_NAME='Example Player',
+            TEAM_ABBREVIATION='BOS', MATCHUP='BOS vs. NYK', WL='W', MIN=30, PTS=pts, REB=5, AST=4)
+        store(normalize([row('2025-26', 'a', 10)], '2025-26'), self.archive)
+        store(normalize([row('2026-27', 'b', 20)], '2026-27'), self.archive)    # also imported into the archive
+        store(normalize([row('2026-27', 'b', 22)], '2026-27'), self.current)    # newer copy wins
+        app = FastAPI()
+        app.include_router(player_router(self.archive, self.current))
+        self.client = TestClient(app)
+        self.addCleanup(self.client.close)
+
+    def test_traded_season_uses_total_row(self):
+        seasons, career = import_careers.parse_career(career_data([
+            ('2003-04', 'CLE', 79, 3127, 1654, 432, 465),
+            ('2004-05', 'AAA', 20, 600, 200, 50, 40), ('2004-05', 'BBB', 30, 900, 300, 60, 50),
+            ('2004-05', 'TOT', 50, 1500, 500, 110, 90)], (129, 4627, 2154, 542, 555)))
+        self.assertEqual(seasons[1], ('2004-05', 'AAA/BBB', 50, 1500.0, 500, 110, 90))
+        self.assertEqual(career, (129, 4627.0, 2154, 542, 555))
+
+    def test_rejects_ambiguous_seasons(self):
+        with self.assertRaises(ValueError):
+            import_careers.parse_career(career_data([('2004-05', 'AAA', 1, 1, 1, 1, 1),
+                                                     ('2004-05', 'BBB', 1, 1, 1, 1, 1)], None))
+
+    def test_current_file_wins_and_seasons_are_not_doubled(self):
+        body = self.client.get('/api/players').json()
+        self.assertEqual(body['seasons'], ['2026-27', '2025-26'])
+        detail = self.client.get('/api/players/1?season=2026-27').json()
+        self.assertEqual([g['points'] for g in detail['games']], [22])
+        self.assertIsNone(detail['career'])
+
+    def test_detail_includes_career_per_game(self):
+        seasons, career = import_careers.parse_career(career_data([
+            ('2024-25', 'BOS', 10, 300, 200, 50, 40), ('2025-26', 'BOS', 20, 600, 300, 100, 60)],
+            (30, 900, 500, 150, 100)))
+        import_careers.store(self.current, 1, seasons, career, '2026-11-26T15:00:00+00:00')
+        career_body = self.client.get('/api/players/1?season=2026-27').json()['career']
+        self.assertEqual((career_body['games'], career_body['first_season'], career_body['last_season']), (30, '2024-25', '2025-26'))
+        self.assertAlmostEqual(career_body['averages']['points'], 500 / 30)
+        self.assertEqual([s['season'] for s in career_body['seasons']], ['2025-26', '2024-25'])
+        self.assertEqual(career_body['seasons'][0]['points'], 15)
+
+    def test_season_players_reads_both_files(self):
+        self.assertEqual(import_careers.season_players('2026-27', [self.archive, self.current]), [1])
 
 
 if __name__ == '__main__':

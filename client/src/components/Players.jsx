@@ -30,6 +30,25 @@ function Loading({ state, retry, label }) {
   return <p className="notice" role="status">{label}</p>;
 }
 
+const one = (value) => (value == null ? '—' : value.toFixed(1));
+
+function Career({ career }) {
+  if (!career) return <section className="panel"><h2>Career</h2><p className="muted">Career stats for this player haven't been imported yet.</p></section>;
+  const span = career.first_season === career.last_season ? career.first_season : `${career.first_season} to ${career.last_season}`;
+  return <section className="panel">
+    <h2>Career</h2>
+    <p className="muted small">Regular season, {span}. {career.games.toLocaleString()} games.</p>
+    <dl className="statline career-line">{[['points', 'Points'], ['rebounds', 'Rebounds'], ['assists', 'Assists'], ['minutes', 'Minutes']].map(([key, label]) =>
+      <div key={key}><dt>{label}</dt><dd>{one(career.averages[key])}</dd></div>)}</dl>
+    <div className="table-scroll"><table className="boxscore"><caption className="sr-only">Per-game averages by season, newest first</caption>
+      <thead><tr><th scope="col">Season</th><th scope="col">Team</th><th scope="col" className="num">GP</th><th scope="col" className="num">PTS</th><th scope="col" className="num">REB</th><th scope="col" className="num">AST</th><th scope="col" className="num">MIN</th></tr></thead>
+      <tbody>{career.seasons.map((season) => <tr key={season.season}><th scope="row">{season.season}</th><td>{season.teams}</td>
+        <td className="num">{season.games}</td><td className="num strong">{one(season.points)}</td><td className="num">{one(season.rebounds)}</td><td className="num">{one(season.assists)}</td><td className="num">{one(season.minutes)}</td></tr>)}</tbody>
+    </table></div>
+    <p className="footnote">Per-game averages. A season played for more than one team shows its combined totals.</p>
+  </section>;
+}
+
 function PlayerDetail({ id, season, window, onWindow, onBack }) {
   const [state, retry] = useLoad(`players/${id}?season=${encodeURIComponent(season)}&window=${window}`, [id, season, window]);
   if (!state.data) return <><button className="back" onClick={onBack}>All players</button><Loading state={state} retry={retry} label="Loading games…" /></>;
@@ -52,6 +71,7 @@ function PlayerDetail({ id, season, window, onWindow, onBack }) {
         {chronological.map((game) => <div key={game.game_id}><span style={{ height: `${game.points / maximum * 100}%` }} /><b>{game.points}</b><small>{game.game_date.slice(5).replace('-', '/')}</small></div>)}
       </div>
     </section>
+    <Career career={player.career} />
     <section className="panel">
       <h2>Game log</h2>
       <div className="table-scroll"><table className="boxscore"><caption className="sr-only">Games, newest first</caption>

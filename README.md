@@ -106,6 +106,28 @@ Limitations: postponed games keep their original forecast. Game logs have no tip
 time, so backfilled games are stamped midnight Eastern. Upcoming neutral-site games
 need an entry in `neutral_sites.json`; finished ones are detected automatically.
 
+## Player stats: this season and careers
+
+stats.nba.com blocks cloud servers, so player stats are refreshed from a home
+connection. This season's game logs and career stats live in a small second database,
+`backend/data/current.sqlite3`; the archive (`nba.sqlite3`) stays untouched, which keeps
+the repository from growing by megabytes every day. The player pages read both files.
+
+```sh
+scripts/mac_refresh.sh            # this season's games; careers on Mondays or first run
+scripts/mac_refresh.sh --careers  # force a career refresh (10-20 minutes)
+```
+
+To run it every morning (8:30 a.m.; macOS catches up after sleep):
+
+```sh
+sed "s#REPO_PATH#$PWD#" scripts/com.nbaforecastlab.refresh.plist > ~/Library/LaunchAgents/com.nbaforecastlab.refresh.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.nbaforecastlab.refresh.plist
+```
+
+Logs: `~/Library/Logs/nba-forecast-lab.log`. Stop it with
+`launchctl bootout gui/$(id -u)/com.nbaforecastlab.refresh`.
+
 ## Deployment
 
 One Docker image builds the React site and serves it from FastAPI, so the API and

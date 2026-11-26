@@ -5,6 +5,7 @@ __pycache__/
 backend/data/*
 !backend/data/backtest/
 !backend/data/nba.sqlite3
+!backend/data/current.sqlite3
 !backend/data/player_points.json
 .env
 .DS_Store
