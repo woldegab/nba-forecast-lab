@@ -1,0 +1,9 @@
+.git
+.github
+**/node_modules
+**/.venv
+**/__pycache__
+client/dist
+backend/data/*.json
+!backend/data/player_points.json
+.env

@@ -1,0 +1,9 @@
+# Render blueprint: New > Blueprint, point it at this repo.
+# Every push to main (including the daily forecast commit) redeploys the site.
+services:
+  - type: web
+    name: nba-forecast-lab
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    healthCheckPath: /

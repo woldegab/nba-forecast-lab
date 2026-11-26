@@ -1,6 +1,10 @@
 backend/.venv/
 __pycache__/
 *.pyc
-backend/data/
+# Raw API downloads stay local; the generated artifacts the site needs are committed.
+backend/data/*
+!backend/data/backtest/
+!backend/data/nba.sqlite3
+!backend/data/player_points.json
 .env
 .DS_Store

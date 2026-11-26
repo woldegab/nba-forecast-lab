@@ -1,0 +1,24 @@
+{
+  "season": "2026-27",
+  "updated_at": "2026-11-26T20:33:03+00:00",
+  "live": {
+    "games": 0
+  },
+  "backfill": {
+    "games": 270,
+    "accuracy": 0.6592592592592592,
+    "brier": 0.21463859365801116,
+    "log_loss": 0.6168447738722059,
+    "home_win_rate": 0.5222222222222223
+  },
+  "all": {
+    "games": 270,
+    "accuracy": 0.6592592592592592,
+    "brier": 0.21463859365801116,
+    "log_loss": 0.6168447738722059,
+    "home_win_rate": 0.5222222222222223
+  },
+  "pending": 0,
+  "first_live_date": null,
+  "note": "Live forecasts were saved before tip-off. Backfill rows were computed after the game from earlier results only, and are reported separately."
+}

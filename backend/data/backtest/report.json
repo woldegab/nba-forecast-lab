@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-11-26T20:21:28.085674+00:00",
+  "data_sha256": "a554a193a5ac2884274e230558eb28b0ad6bc140da9d469b4d4c840faaf2b7b0",
+  "parameters": {
+    "initial_rating": 1500.0,
+    "k": 20.0,
+    "home_advantage": 65.0,
+    "retention": 0.75
+  },
+  "warmup_season": "2023-24",
+  "development_season": "2024-25",
+  "test_season": "2025-26",
+  "coverage": {
+    "2023-24": {
+      "games": 1230,
+      "teams": 30,
+      "games_per_team": 82,
+      "neutral_games": 4,
+      "first_date": "2023-10-24",
+      "last_date": "2024-04-14"
+    },
+    "2024-25": {
+      "games": 1230,
+      "teams": 30,
+      "games_per_team": 82,
+      "neutral_games": 5,
+      "first_date": "2024-10-22",
+      "last_date": "2025-04-13"
+    },
+    "2025-26": {
+      "games": 1230,
+      "teams": 30,
+      "games_per_team": 82,
+      "neutral_games": 5,
+      "first_date": "2025-10-21",
+      "last_date": "2026-04-12"
+    }
+  },
+  "home_rate_from_warmup": 0.5432300163132137,
+  "results": {
+    "2024-25": {
+      "games": 1230,
+      "elo": {
+        "accuracy": 0.6528455284552845,
+        "brier": 0.2143552056593289,
+        "log_loss": 0.6165002185276323
+      },
+      "home_rate_baseline": {
+        "accuracy": 0.5439024390243903,
+        "brier": 0.2480302847578471,
+        "log_loss": 0.6892025553164715
+      },
+      "always_pick_designated_home_accuracy": 0.5439024390243903,
+      "coin_flip_brier": 0.25
+    },
+    "2025-26": {
+      "games": 1230,
+      "elo": {
+        "accuracy": 0.6772357723577236,
+        "brier": 0.2097129840746686,
+        "log_loss": 0.6081283474893375
+      },
+      "home_rate_baseline": {
+        "accuracy": 0.5544715447154471,
+        "brier": 0.24718677224441807,
+        "log_loss": 0.6875113076402636
+      },
+      "always_pick_designated_home_accuracy": 0.5544715447154471,
+      "coin_flip_brier": 0.25
+    }
+  },
+  "protocol": "Fixed parameters; predict before updating; updates after each date; ratings carry forward with offseason regression. No parameter tuning on either evaluation season.",
+  "limitations": [
+    "Historical backtest using current corrected records, not archived pregame snapshots.",
+    "Ratings update after prior test games; this evaluates daily sequential forecasting, not preseason forecasts.",
+    "No injuries, rosters, player projections, rest, margin-of-victory or playoff updates.",
+    "Neutral-site registry is manually maintained; home-court advantage is zero for listed games.",
+    "2025-26 has now been evaluated; repeated development against it would make it development data."
+  ]
+}
