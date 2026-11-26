@@ -88,9 +88,12 @@ backend/.venv/bin/python backend/live_forecast.py update
 ```
 
 `init` replays the archive and saves offseason-regressed starting ratings.
-`update` downloads this season's results and yesterday's and today's scoreboards
-from stats.nba.com (through `nba_api`, like the importers), fills in final scores, and
-records a forecast for every game on today's Eastern date that has not tipped off. A forecast row is
+`update` downloads yesterday's and today's games from ESPN's public scoreboard, fills
+in final scores, and records a forecast for every game on today's Eastern date that
+has not tipped off. Earlier results come from the ledger itself, so each run needs only
+two small requests. stats.nba.com blocks cloud servers like GitHub Actions; from a home
+connection, `update --source nba` rebuilds the whole season from it instead. Games are
+matched across sources by date and teams, so the two never double-count. A forecast row is
 never rewritten; later runs only add the result. Ratings use finished games from
 earlier dates only, matching the backtest. Games that ended before the ledger first
 saw them are stored as `backfill` and excluded from the live record.

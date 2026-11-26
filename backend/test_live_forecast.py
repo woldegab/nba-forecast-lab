@@ -10,8 +10,8 @@ from unittest import mock
 
 import live_forecast
 from live_forecast import (LEDGER_FILE, START_FILE, SUMMARY_FILE, combine, games_from_results, main,
-                           parse_schedule, parse_scoreboard, read_ledger, start_ratings, summarize,
-                           update, write_ledger)
+                           parse_espn, parse_schedule, parse_scoreboard, read_ledger, start_ratings,
+                           summarize, update, write_ledger)
 
 START = dict(season='2026-27', parameters=dict(initial_rating=1500.0, k=20.0,
              home_advantage=65.0, retention=0.75),
@@ -210,6 +210,67 @@ class NbaApiSourceTests(unittest.TestCase):
         ledger, notes = update(games, START, {}, at('2026-11-26T15:00:00'))
         self.assertNotIn('0022600060', ledger)
         self.assertTrue(notes)
+
+
+TEAM_IDS = {'AAA': 1, 'BBB': 2, 'CCC': 3, 'NYK': 4}
+
+
+def espn_event(event_id, date, home='AAA', away='BBB', state='pre', scores=('0', '0'), season_type=2, name=None):
+    # Same shape as ESPN's scoreboard (checked against the 2026-11-27 feed).
+    completed = state == 'post'
+    status = dict(type=dict(state=state, completed=completed,
+                            name=name or ('STATUS_FINAL' if completed else 'STATUS_SCHEDULED')))
+    return dict(id=event_id, date=date, season=dict(year=2027, type=season_type), status=status,
+                competitions=[dict(neutralSite=False, status=status, competitors=[
+                    dict(homeAway='home', score=scores[0], team=dict(id='x', abbreviation=home)),
+                    dict(homeAway='away', score=scores[1], team=dict(id='y', abbreviation=away))])])
+
+
+def espn(*events):
+    return dict(events=list(events))
+
+
+class EspnSourceTests(unittest.TestCase):
+    def test_maps_espn_codes_and_skips_other_season_types(self):
+        games = parse_espn(espn(espn_event('401', '2026-11-28T00:00Z', home='NY'),
+                                espn_event('402', '2026-11-28T00:00Z', season_type=1)), TEAM_IDS)
+        self.assertEqual(len(games), 1)
+        g = games[0]
+        self.assertEqual((g['game_id'], g['home_team'], g['home_team_id'], g['game_date'], g['status']),
+                         ('espn-401', 'NYK', 4, '2026-11-27', 1))
+
+    def test_final_scores_and_postponed(self):
+        final, postponed = parse_espn(espn(
+            espn_event('401', '2026-11-27T00:30Z', state='post', scores=('110', '104')),
+            espn_event('402', '2026-11-27T00:30Z', name='STATUS_POSTPONED')), TEAM_IDS)
+        self.assertEqual((final['status'], final['home_score'], final['away_score']), (3, 110, 104))
+        self.assertTrue(postponed['postponed'])
+
+    def test_unknown_team_is_an_error(self):
+        with self.assertRaises(ValueError):
+            parse_espn(espn(espn_event('401', '2026-11-28T00:00Z', home='ZZZ')), TEAM_IDS)
+
+    def test_saved_results_feed_ratings_without_duplicates_across_sources(self):
+        # Ledger already has Nov 25 from nba_api (backfill). ESPN reports the same game under its own ID.
+        backfill = parse_schedule(schedule(game('0022600050', '2026-11-26T00:30:00Z', status=3, scores=(80, 120))))
+        ledger, _ = update(backfill, START, {}, at('2026-11-26T05:00:00'))
+        self.assertEqual(list(ledger), ['0022600050'])
+        games = parse_espn(espn(
+            espn_event('401', '2026-11-26T00:30Z', state='post', scores=('80', '120')),   # same game
+            espn_event('402', '2026-11-27T00:30Z', home='AAA', away='CCC')), TEAM_IDS)   # today
+        later, notes = update(games, START, ledger, at('2026-11-26T15:00:00'))
+        self.assertEqual(notes, [])
+        self.assertEqual(sorted(later), ['0022600050', 'espn-402'])   # no duplicate of Nov 25
+        self.assertLess(float(later['espn-402']['home_rating']), 1550.0)   # AAA's loss counted once
+
+    def test_cli_uses_espn_by_default(self):
+        board_days = {'2026-11-25': espn(), '2026-11-26': espn(espn_event('402', '2026-11-27T00:30Z'))}
+        with tempfile.TemporaryDirectory() as folder, \
+                mock.patch.object(live_forecast, 'fetch_espn', side_effect=board_days.get), \
+                redirect_stdout(io.StringIO()):
+            (Path(folder) / START_FILE).write_text(json.dumps(START))
+            self.assertEqual(main(['update', '--live-dir', folder, '--now', '2026-11-26T15:00:00+00:00']), 0)
+            self.assertEqual(list(read_ledger(Path(folder) / LEDGER_FILE)), ['espn-402'])
 
 
 if __name__ == '__main__':

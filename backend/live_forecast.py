@@ -6,10 +6,10 @@ Two commands:
           final ratings for the offseason, and save them as the 2026-27 starting
           ratings. Run once, locally, after importing 2025-26.
 
-  update  Download this season's results and today's scoreboard (stats.nba.com via
-          nba_api), fill in final scores, and record a forecast for every game today
-          (US Eastern date) that has not started yet. Run daily, after the previous
-          day's games have finished.
+  update  Download yesterday's and today's games (ESPN by default; --source nba for the
+          whole season from stats.nba.com), fill in final scores, and record a forecast
+          for every game today (US Eastern date) that has not started yet. Run daily,
+          after the previous day's games have finished.
 
 Forecast rows are never rewritten: once a game's probability is in the ledger,
 later runs only add its final score. Games that finished before the ledger first
@@ -221,6 +221,74 @@ def combine(results, *scoreboards):
     return sorted(games.values(), key=lambda g: (g["tipoff"], g["game_id"]))
 
 
+ESPN_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard?dates={day}"
+# ESPN abbreviations that differ from the NBA's.
+ESPN_TO_NBA = {"GS": "GSW", "NY": "NYK", "SA": "SAS", "NO": "NOP", "UTAH": "UTA", "WSH": "WAS"}
+
+
+def fetch_espn(day, timeout=30):
+    """ESPN's public scoreboard for one date (YYYY-MM-DD). Reachable from cloud servers."""
+    import httpx
+    url = ESPN_SCOREBOARD.format(day=day.replace("-", ""))
+
+    def request():
+        response = httpx.get(url, timeout=timeout, follow_redirects=True)
+        response.raise_for_status()
+        return response.json()
+    return with_retries(f"ESPN scoreboard request for {day}", request)
+
+
+def parse_espn(data, team_ids):
+    """Regular-season games from an ESPN scoreboard, mapped to NBA team IDs and codes."""
+    games = []
+    for event in data.get("events", []):
+        if int(event["season"]["type"]) != 2:   # 2 = regular season
+            continue
+        competition = event["competitions"][0]
+        sides = {c["homeAway"]: c for c in competition["competitors"]}
+        if set(sides) != {"home", "away"}:
+            raise ValueError(f"ESPN event {event['id']}: expected a home and an away team")
+        codes = {}
+        for side, competitor in sides.items():
+            code = ESPN_TO_NBA.get(competitor["team"]["abbreviation"], competitor["team"]["abbreviation"])
+            if code not in team_ids:
+                raise ValueError(f"ESPN event {event['id']}: unknown team {competitor['team']['abbreviation']}")
+            codes[side] = code
+        if codes["home"] == codes["away"]:
+            raise ValueError(f"ESPN event {event['id']}: same team twice")
+        state = (event.get("status") or competition["status"])["type"]
+        name = str(state.get("name", "")).upper()
+        tipoff = datetime.fromisoformat(event["date"].replace("Z", "+00:00"))
+        final = bool(state.get("completed")) and state.get("state") == "post"
+        game = dict(game_id=f"espn-{event['id']}", tipoff=tipoff,
+                    game_date=tipoff.astimezone(EASTERN).date().isoformat(),
+                    status=FINAL if final else NOT_STARTED if state.get("state") == "pre" else 2,
+                    postponed="POSTPONED" in name or "CANCELED" in name,
+                    home_team_id=team_ids[codes["home"]], home_team=codes["home"],
+                    away_team_id=team_ids[codes["away"]], away_team=codes["away"],
+                    neutral_site=int(bool(competition.get("neutralSite"))),
+                    home_score=None, away_score=None)
+        if final:
+            scores = [int(sides["home"]["score"]), int(sides["away"]["score"])]
+            if min(scores) < 0 or scores[0] == scores[1]:
+                raise ValueError(f"ESPN event {event['id']}: invalid final score")
+            game["home_score"], game["away_score"] = scores
+        games.append(game)
+    return games
+
+
+def download_espn(now, start):
+    """Yesterday's and today's games from ESPN. Earlier results come from the ledger."""
+    team_ids = {value["team"]: int(team) for team, value in start["ratings"].items()}
+    today = now.astimezone(EASTERN).date()
+    days = [(today - timedelta(days=1)).isoformat(), today.isoformat()]
+    games = {}
+    for day in days:
+        for game in parse_espn(fetch_espn(day), team_ids):
+            games[game["game_id"]] = game
+    return sorted(games.values(), key=lambda g: (g["tipoff"], g["game_id"]))
+
+
 def download_games(now):
     """This season's finished games plus yesterday's and today's scoreboards."""
     today = now.astimezone(EASTERN).date()
@@ -265,28 +333,65 @@ def prediction_row(game, home_rating, away_rating, probability, now, mode):
                 home_score="", away_score="", actual_home_win="")
 
 
+def matchup_key(game):
+    """Identifies a game across data sources, whose game IDs differ."""
+    return (game["game_date"], int(game["home_team_id"]), int(game["away_team_id"]))
+
+
+def ledger_game(row):
+    """A finished ledger row as a game, so saved results feed the ratings."""
+    return dict(game_id=row["game_id"], game_date=row["game_date"],
+                tipoff=datetime.fromisoformat(row["tipoff_utc"]), status=FINAL, postponed=False,
+                home_team_id=int(row["home_team_id"]), home_team=row["home_team"],
+                away_team_id=int(row["away_team_id"]), away_team=row["away_team"],
+                neutral_site=int(row["neutral_site"]),
+                home_score=int(row["home_score"]), away_score=int(row["away_score"]))
+
+
 def update(schedule_games, start, ledger, now):
-    """Return (ledger, notes). Existing forecast fields are never changed."""
+    """Return (ledger, notes). Existing forecast fields are never changed.
+
+    Finished games come from the ledger itself plus the downloaded games, so a
+    daily run only needs yesterday's and today's scoreboards.
+    """
     ledger = copy.deepcopy(ledger)
     notes = []
     today = now.astimezone(EASTERN).date().isoformat()
     by_id = {g["game_id"]: g for g in schedule_games}
+    by_key = {matchup_key(g): g for g in schedule_games}
+
+    def downloaded(row):
+        game = by_id.get(row["game_id"]) or by_key.get(matchup_key(row))
+        if game:
+            return game, False
+        swapped = by_key.get((row["game_date"], int(row["away_team_id"]), int(row["home_team_id"])))
+        return swapped, swapped is not None
 
     # 1. Record final scores for games already in the ledger.
-    for game_id, row in ledger.items():
-        game = by_id.get(game_id)
+    for row in ledger.values():
+        game, swapped = downloaded(row)
         if game and game["status"] == FINAL and row["home_score"] == "":
-            row["home_score"], row["away_score"] = game["home_score"], game["away_score"]
-            row["actual_home_win"] = int(game["home_score"] > game["away_score"])
+            home, away = (game["away_score"], game["home_score"]) if swapped else (game["home_score"], game["away_score"])
+            row["home_score"], row["away_score"], row["actual_home_win"] = home, away, int(home > away)
+
+    # Games the ledger already holds, under either data source's ID or designation.
+    known_ids = set(ledger)
+    known_keys = set()
+    for row in ledger.values():
+        known_keys.add(matchup_key(row))
+        known_keys.add((row["game_date"], int(row["away_team_id"]), int(row["home_team_id"])))
+    is_known = lambda g: g["game_id"] in known_ids or matchup_key(g) in known_keys
 
     # 2. Rebuild current ratings from finished games on earlier dates only.
-    finished = [g for g in schedule_games if g["status"] == FINAL and g["game_date"] < today]
+    saved = [ledger_game(r) for r in ledger.values() if r["home_score"] != "" and r["game_date"] < today]
+    new_finals = [g for g in schedule_games if g["status"] == FINAL and g["game_date"] < today and not is_known(g)]
     ratings = {int(team): value["rating"] for team, value in start["ratings"].items()}
-    replay = backtest([dict(g, season=LIVE_SEASON) for g in finished], start["parameters"], ratings)
+    replay = backtest([dict(g, season=LIVE_SEASON) for g in saved + new_finals], start["parameters"], ratings)
 
     # 3. Games that finished before the ledger saw them: backfill, labeled as such.
+    new_ids = {g["game_id"] for g in new_finals}
     for row in replay:
-        if row["game_id"] not in ledger:
+        if row["game_id"] in new_ids:
             game = by_id[row["game_id"]]
             new = prediction_row(game, row["home_rating"], row["away_rating"],
                                  row["home_win_probability"], now, "backfill")
@@ -303,7 +408,7 @@ def update(schedule_games, start, ledger, now):
         return ledger, notes
     for game in schedule_games:
         if (game["game_date"] == today and game["status"] == NOT_STARTED and not game["postponed"]
-                and game["tipoff"] > now and game["game_id"] not in ledger):
+                and game["tipoff"] > now and not is_known(game)):
             home = ratings.get(game["home_team_id"], start["parameters"]["initial_rating"])
             away = ratings.get(game["away_team_id"], start["parameters"]["initial_rating"])
             probability = win_probability(home, away, game["neutral_site"], start["parameters"])
@@ -338,6 +443,10 @@ def main(argv=None):
     daily = commands.add_parser("update", help="Record results and today's forecasts")
     daily.add_argument("--input", type=Path, help="Read a saved NBA season-schedule JSON instead of downloading")
     daily.add_argument("--now", help="Override the current time (ISO 8601, for testing)")
+    daily.add_argument("--source", choices=["espn", "nba"], default="espn",
+                       help="espn (default): yesterday's and today's ESPN scoreboards, works from "
+                            "GitHub Actions. nba: the full season from stats.nba.com via nba_api, "
+                            "which blocks cloud servers but works from a home connection.")
     for command in (first, daily):
         command.add_argument("--live-dir", type=Path, default=LIVE_DIR)
     args = parser.parse_args(argv)
@@ -350,7 +459,12 @@ def main(argv=None):
         if now.tzinfo is None:
             raise ValueError("--now must include a timezone, e.g. 2026-11-26T15:00:00+00:00")
         start = json.loads((args.live_dir / START_FILE).read_text())
-        games = parse_schedule(json.loads(args.input.read_text())) if args.input else download_games(now)
+        if args.input:
+            games = parse_schedule(json.loads(args.input.read_text()))
+        elif args.source == "nba":
+            games = download_games(now)
+        else:
+            games = download_espn(now, start)
         ledger_path = args.live_dir / LEDGER_FILE
         before = read_ledger(ledger_path)
         ledger, notes = update(games, start, before, now)
