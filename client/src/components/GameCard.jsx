@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import teamLogos from '../utils/teamLogos';
 import { teamInfo } from '../utils/teams';
 import { isEven } from '../utils/forecast';
@@ -25,7 +25,16 @@ function TeamLine({ abbreviation, probability, score, favorite, winner, reveal, 
   </div>;
 }
 
-export default function GameCard({ game, showResults = true, onExplore }) {
+export { Logo };
+
+export default function GameCard({ game, showResults = true, onExplore, animate = false }) {
+  // Bars start even and grow to the forecast split once, when the card first appears.
+  const [grown, setGrown] = useState(!animate);
+  useEffect(() => {
+    if (grown) return undefined;
+    const frame = requestAnimationFrame(() => setGrown(true));
+    return () => cancelAnimationFrame(frame);
+  }, [grown]);
   const final = game.home_score != null;
   const reveal = final && showResults;
   const away = teamInfo(game.away_team);
@@ -47,8 +56,8 @@ export default function GameCard({ game, showResults = true, onExplore }) {
         favorite={homeFavored} winner={game.actual_winner === game.home_team} reveal={reveal} home />
     </div>
     <div className="split" role="img" aria-label={`Win chance: ${away.fullName} ${whole(game.away_win_probability)}, ${home.fullName} ${whole(game.home_win_probability)}`}>
-      <span style={{ flexGrow: game.away_win_probability, background: away.color }} />
-      <span style={{ flexGrow: game.home_win_probability, background: home.color }} />
+      <span style={{ flexGrow: grown ? game.away_win_probability : 0.5, background: away.color }} />
+      <span style={{ flexGrow: grown ? game.home_win_probability : 0.5, background: home.color }} />
     </div>
     <div className="game-actions">
       <details>

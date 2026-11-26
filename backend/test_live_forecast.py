@@ -273,5 +273,28 @@ class EspnSourceTests(unittest.TestCase):
             self.assertEqual(list(read_ledger(Path(folder) / LEDGER_FILE)), ['espn-402'])
 
 
+class NextGamesTests(unittest.TestCase):
+    def test_finds_first_day_with_games(self):
+        days = {'2026-11-27': espn(), '2026-11-28': espn(espn_event('401', '2026-11-29T00:00Z'),
+                                                           espn_event('402', '2026-11-29T00:30Z', home='CCC'))}
+        found = live_forecast.find_next_games(at('2026-11-26T15:00:00'), START, days=5,
+                                              fetch=lambda day: days.get(day, espn()))
+        self.assertEqual(found, dict(date='2026-11-28', games=2))
+
+    def test_none_when_nothing_scheduled(self):
+        self.assertIsNone(live_forecast.find_next_games(at('2026-11-26T15:00:00'), START, days=3, fetch=lambda day: espn()))
+
+    def test_cli_saves_next_games_on_an_empty_day(self):
+        days = {'2026-11-25': espn(), '2026-11-26': espn(),
+                '2026-11-27': espn(espn_event('402', '2026-11-28T00:30Z'))}
+        with tempfile.TemporaryDirectory() as folder, \
+                mock.patch.object(live_forecast, 'fetch_espn', side_effect=lambda day: days.get(day, espn())), \
+                redirect_stdout(io.StringIO()):
+            (Path(folder) / START_FILE).write_text(json.dumps(START))
+            self.assertEqual(main(['update', '--live-dir', folder, '--now', '2026-11-26T15:00:00+00:00']), 0)
+            summary = json.loads((Path(folder) / SUMMARY_FILE).read_text())
+        self.assertEqual(summary['next_games'], dict(date='2026-11-27', games=1))
+
+
 if __name__ == '__main__':
     unittest.main()

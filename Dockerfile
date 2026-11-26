@@ -14,6 +14,8 @@ COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ backend/
 COPY --from=client /client/dist client/dist
+# Fresh link preview image on every deploy (each daily forecast commit redeploys).
+RUN python backend/og_image.py
 RUN useradd --create-home app
 USER app
 EXPOSE 8000

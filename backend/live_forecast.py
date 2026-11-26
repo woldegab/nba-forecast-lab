@@ -289,6 +289,22 @@ def download_espn(now, start):
     return sorted(games.values(), key=lambda g: (g["tipoff"], g["game_id"]))
 
 
+def find_next_games(now, start, days=10, fetch=None):
+    """First date after today with regular-season games, as {date, games}, or None.
+
+    Only called on days without games, so a normal day makes no extra requests.
+    """
+    fetch = fetch or fetch_espn
+    team_ids = {value["team"]: int(team) for team, value in start["ratings"].items()}
+    today = now.astimezone(EASTERN).date()
+    for offset in range(1, days + 1):
+        day = (today + timedelta(days=offset)).isoformat()
+        games = [g for g in parse_espn(fetch(day), team_ids) if not g["postponed"]]
+        if games:
+            return dict(date=day, games=len(games))
+    return None
+
+
 def download_games(now):
     """This season's finished games plus yesterday's and today's scoreboards."""
     today = now.astimezone(EASTERN).date()
@@ -470,6 +486,12 @@ def main(argv=None):
         ledger, notes = update(games, start, before, now)
         write_ledger(ledger_path, ledger)
         summary = summarize(ledger, now)
+        today = now.astimezone(EASTERN).date().isoformat()
+        if not args.input and args.source == "espn" and not any(g["game_date"] == today for g in games):
+            try:
+                summary["next_games"] = find_next_games(now, start)
+            except (RuntimeError, ValueError, KeyError, TypeError) as error:
+                notes.append(f"Could not look up the next game day: {error}")
         (args.live_dir / SUMMARY_FILE).write_text(json.dumps(summary, indent=2) + "\n")
     except (RuntimeError, ValueError, KeyError, TypeError, OSError, sqlite3.Error) as error:
         print(f"Live update failed: {error}", file=sys.stderr)

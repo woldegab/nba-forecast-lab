@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import PlayerPhoto from './PlayerPhoto';
+import { Loading as Placeholder, PlayerSkeletons } from './Skeleton';
 import { getData } from '../services/nbaApi';
 import { teamInfo } from '../utils/teams';
 
@@ -25,9 +26,9 @@ function useLoad(path, deps) {
   return [state, () => { setState({ loading: true }); setAttempt((n) => n + 1); }];
 }
 
-function Loading({ state, retry, label }) {
+function Loading({ state, retry, label, grid = false }) {
   if (state.error) return <div className="notice" role="alert"><p>{state.error}</p><button className="pill" onClick={retry}>Try again</button></div>;
-  return <p className="notice" role="status">{label}</p>;
+  return <Placeholder label={label}>{grid ? <PlayerSkeletons /> : <span className="bone hero-bone" />}</Placeholder>;
 }
 
 const one = (value) => (value == null ? '—' : value.toFixed(1));
@@ -87,7 +88,7 @@ const sorts = [['points', 'Points'], ['rebounds', 'Rebounds'], ['assists', 'Assi
 
 function PlayerCard({ player, onSelect }) {
   return <button className="player-card" onClick={() => onSelect(player.player_id)}>
-    <PlayerPhoto id={player.player_id} name={player.name} card color={teamInfo(player.team).color} />
+    <PlayerPhoto id={player.player_id} name={player.name} card color={teamInfo(player.team).color} team={player.team} />
     <span className="player-card-text">
       <strong>{player.name}</strong>
       <small>{teamInfo(player.team).fullName}</small>
@@ -109,7 +110,7 @@ export default function Players() {
   const [shown, setShown] = useState(24);
   const [selected, setSelected] = useState(null);
   const [state, retry] = useLoad(`players?window=${window}${season ? `&season=${encodeURIComponent(season)}` : ''}`, [season, window]);
-  if (!state.data) return <><section className="intro simple"><div><h1>Players</h1></div></section><Loading state={state} retry={retry} label="Loading players…" /></>;
+  if (!state.data) return <><section className="intro simple"><div><h1>Players</h1></div></section><Loading state={state} retry={retry} label="Loading players" grid /></>;
   const data = state.data;
   if (selected) return <PlayerDetail key={`${selected}-${data.season}-${window}`} id={selected} season={data.season} window={window} onWindow={setWindow} onBack={() => setSelected(null)} />;
   const teams = [...new Set(data.players.map((player) => player.team))].sort();

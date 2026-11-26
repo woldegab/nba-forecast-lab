@@ -3,6 +3,9 @@ import GameCard from './components/GameCard';
 import Players from './components/Players';
 import Matchup from './components/Matchup';
 import Tonight from './components/Tonight';
+import Teams from './components/Teams';
+import { CalibrationChart } from './components/Charts';
+import { GameSkeletons, Loading } from './components/Skeleton';
 import { getData } from './services/nbaApi';
 import { teamInfo } from './utils/teams';
 import './App.css';
@@ -10,7 +13,7 @@ import './App.css';
 const pct = (value) => `${(value * 100).toFixed(1)}%`;
 const dateLabel = (date, options = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) => new Date(`${date}T12:00:00`).toLocaleDateString('en-US', options);
 const record = (accuracy, games) => { const wins = Math.round(accuracy * games); return `${wins.toLocaleString()}–${(games - wins).toLocaleString()}`; };
-const views = [['tonight', 'Today'], ['archive', 'Past seasons'], ['players', 'Players'], ['model', 'How it works']];
+const views = [['tonight', 'Today'], ['teams', 'Teams'], ['archive', 'Past seasons'], ['players', 'Players'], ['model', 'How it works']];
 
 function Retry({ message, onRetry }) {
   return <div className="notice" role="alert"><p>{message}</p><button className="pill" onClick={onRetry}>Try again</button></div>;
@@ -46,7 +49,7 @@ function Slate({ date, controls }) {
     return () => controller.abort();
   }, [date, attempt]);
   if (matchup) return <Matchup key={matchup.game_id} game={matchup} showResults={showResults} onShowResults={setShowResults} onBack={() => setMatchup(null)} />;
-  if (state.loading) return <><div className="toolbar sticky">{controls}</div><p className="notice" role="status">Loading games…</p></>;
+  if (state.loading) return <><div className="toolbar sticky">{controls}</div><Loading label="Loading games"><span className="bone day-bone" /><GameSkeletons /></Loading></>;
   if (state.error) return <><div className="toolbar sticky">{controls}</div><Retry message={state.error} onRetry={() => { setState({ loading: true }); setAttempt((n) => n + 1); }} /></>;
   const search = query.trim().toLowerCase();
   const visible = state.games.filter((game) =>
@@ -104,11 +107,17 @@ function Archive({ data }) {
 function Model({ data }) {
   const { report } = data;
   const [live, setLive] = useState(null);
+  const [calibration, setCalibration] = useState(null);
   useEffect(() => {
     const controller = new AbortController();
     getData('live?recent=0', controller.signal).then((body) => setLive(body.summary)).catch(() => {});
+    getData('calibration', controller.signal).then(setCalibration).catch(() => {});
     return () => controller.abort();
   }, []);
+  const series = calibration ? [
+    { name: `Past seasons, ${calibration.archive.seasons[0]} to ${calibration.archive.seasons.at(-1)}`, className: 'archive', games: calibration.archive.games, buckets: calibration.archive.buckets },
+    ...(calibration.live.games >= 30 ? [{ name: `Live ${calibration.live.season}`, className: 'live', games: calibration.live.games, buckets: calibration.live.buckets }] : []),
+  ] : [];
   const rows = Object.entries(report.results).map(([season, r]) => ({ season, phase: season === report.test_season ? 'Held-out test' : 'Development',
     games: r.games, accuracy: r.elo.accuracy, home: r.always_pick_designated_home_accuracy, brier: r.elo.brier }));
   if (live?.live?.games) rows.push({ season: live.season, phase: 'Live, saved before tip-off', games: live.live.games, accuracy: live.live.accuracy, home: live.live.home_win_rate, brier: live.live.brier });
@@ -132,6 +141,14 @@ function Model({ data }) {
       <p className="muted small">Brier score {row.brier.toFixed(3)}</p>
     </article>)}</div>
     <p className="footnote">Brier score measures how good the probabilities are, not just the picks. Lower is better; guessing 50/50 every game scores 0.250.</p>
+    {series.length > 0 && <section className="section calibration-section">
+      <div>
+        <h2>Do the percentages mean what they say?</h2>
+        <p>Games are grouped by how confident the forecast was. If the model is honest, favorites given 70% should win about 70% of the time, so the dots should sit near the dashed line.</p>
+        <p className="muted small">Bigger dots are groups with more games. Hover a dot for the numbers.</p>
+      </div>
+      <CalibrationChart series={series} />
+    </section>}
     <section className="section">
       <h2>The model in four steps</h2>
       <ol className="steps">{steps.map(([title, text]) => <li key={title}><h3>{title}</h3><p>{text}</p></li>)}</ol>
@@ -158,8 +175,9 @@ export default function App() {
     </header>
     <main id="main" className="main">
       {view === 'tonight' && <Tonight onArchive={() => setView('archive')} />}
+      {view === 'teams' && <Teams />}
       {view === 'players' && <Players />}
-      {needsArchive && (archive.loading ? <p className="notice" role="status">Loading…</p>
+      {needsArchive && (archive.loading ? <Loading label="Loading"><section className="intro simple"><div><span className="bone title" /><span className="bone shorter" /></div></section><GameSkeletons count={3} /></Loading>
         : archive.error ? <Retry message={archive.error} onRetry={retryArchive} />
         : view === 'archive' ? <Archive data={archive.data} /> : <Model data={archive.data} />)}
     </main>

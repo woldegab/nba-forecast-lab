@@ -113,6 +113,37 @@ class LiveAndStaticTests(unittest.TestCase):
         with self.client(self.path / 'nothing') as client:
             self.assertEqual(client.get('/api/live').status_code, 503)
 
+    def test_teams_rankings_detail_and_calibration(self):
+        (self.live / 'start_ratings.json').write_text(json.dumps(dict(parameters=dict(k=20.0),
+            ratings={'1': dict(team='AAA', rating=1550.0), '2': dict(team='BBB', rating=1450.0)})))
+        with self.client() as client:
+            body = client.get('/api/teams').json()
+            self.assertEqual(body['season'], '2026-27')
+            self.assertEqual([t['team'] for t in body['teams']], ['AAA', 'BBB'])
+            self.assertEqual((body['teams'][0]['wins'], body['teams'][0]['losses']), (0, 1))
+            detail = client.get('/api/teams/bbb').json()
+            self.assertEqual(detail['games'][0]['result'], 'W')
+            self.assertEqual([g['game_id'] for g in detail['upcoming']], ['2'])
+            self.assertEqual(client.get('/api/teams/ZZZ').status_code, 404)
+            live = client.get('/api/calibration').json()['live']
+            self.assertEqual(live['games'], 1)
+            self.assertEqual(next(b for b in live['buckets'] if b['low'] == 0.7)['actual'], 0.0)
+
+    def test_link_preview_served_when_generated(self):
+        with self.client() as client:
+            self.assertEqual(client.get('/og.png').status_code, 404)
+        from og_image import render
+        render(self.live, self.path / 'missing', self.live / 'og.png')
+        with self.client() as client:
+            response = client.get('/og.png')
+            self.assertEqual((response.status_code, response.headers['content-type']), (200, 'image/png'))
+            self.assertEqual(response.content[:8], b'\x89PNG\r\n\x1a\n')
+
+    def test_teams_need_some_forecasts(self):
+        with self.client(self.path / 'nothing') as client:
+            self.assertEqual(client.get('/api/teams').status_code, 503)
+            self.assertEqual(client.get('/api/calibration').status_code, 503)
+
     def test_serves_built_app_and_spa_routes(self):
         with self.client() as client:
             self.assertEqual(client.get('/').text, '<html>app</html>')
