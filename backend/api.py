@@ -132,6 +132,32 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
         finished = [g for g in games if g["home_score"] is not None and g["mode"] == "live"]
         return dict(summary=summary, upcoming=upcoming, recent=finished[-recent:][::-1] if recent else [])
 
+    def live_games():
+        try:
+            return load_live(Path(live_dir))
+        except (OSError, ValueError, KeyError, TypeError):
+            raise HTTPException(503, "Live forecasts are not available yet. Run backend/live_forecast.py update.")
+
+    @app.get("/api/live/days")
+    def live_days():
+        """Every date this season with games, and how the forecasts did that day."""
+        summary, games = live_games()
+        days = {}
+        for g in games:
+            day = days.setdefault(g["date"], dict(date=g["date"], games=0, finished=0, correct=0, backfill=0))
+            day["games"] += 1
+            day["backfill"] += g["mode"] == "backfill"
+            if g["correct"] is not None:
+                day["finished"] += 1
+                day["correct"] += g["correct"]
+        return dict(season=summary["season"], days=sorted(days.values(), key=lambda d: d["date"]))
+
+    @app.get("/api/live/day")
+    def live_day(date: Date = Query(...)):
+        _, games = live_games()
+        selected = date.isoformat()
+        return dict(date=selected, games=[g for g in games if g["date"] == selected])
+
     def team_sources():
         """{season: (games, K, starting ratings by team or None)} from the archive and live ledger."""
         sources = {}

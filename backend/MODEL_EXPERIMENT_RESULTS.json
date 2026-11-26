@@ -1,0 +1,89 @@
+{
+  "development": {
+    "current": {
+      "accuracy": 0.6528455284552845,
+      "brier": 0.2143552056593289,
+      "log_loss": 0.6165002185276323,
+      "games": 1230
+    },
+    "margin_of_victory": {
+      "accuracy": 0.6682926829268293,
+      "brier": 0.21179580642788476,
+      "log_loss": 0.6108717313136117,
+      "games": 1230
+    },
+    "back_to_back": {
+      "0": {
+        "accuracy": 0.6528455284552845,
+        "brier": 0.2143552056593289,
+        "log_loss": 0.6165002185276323,
+        "games": 1230
+      },
+      "10": {
+        "accuracy": 0.6504065040650406,
+        "brier": 0.21385309824904042,
+        "log_loss": 0.6152984279998108,
+        "games": 1230
+      },
+      "20": {
+        "accuracy": 0.6536585365853659,
+        "brier": 0.21342844978301057,
+        "log_loss": 0.6142759733629263,
+        "games": 1230
+      },
+      "30": {
+        "accuracy": 0.6601626016260163,
+        "brier": 0.2130817145779217,
+        "log_loss": 0.6134327091889983,
+        "games": 1230
+      },
+      "40": {
+        "accuracy": 0.6609756097560976,
+        "brier": 0.21281300416083906,
+        "log_loss": 0.6127682585838978,
+        "games": 1230
+      },
+      "50": {
+        "accuracy": 0.6593495934959349,
+        "brier": 0.21262208905196375,
+        "log_loss": 0.6122820155104821,
+        "games": 1230
+      }
+    }
+  },
+  "chosen": "margin of victory + back-to-back 50",
+  "chosen_parameters": {
+    "initial_rating": 1500.0,
+    "k": 20.0,
+    "home_advantage": 65.0,
+    "retention": 0.75,
+    "margin_of_victory": true,
+    "back_to_back": 50.0
+  },
+  "rest_facts": {
+    "back_to_back_appearances": 450,
+    "back_to_back_win_rate": 0.44666666666666666,
+    "one_team_tired_games": 308,
+    "rested_team_win_rate": 0.577922077922078
+  },
+  "adopt": true,
+  "held_out": {
+    "current": {
+      "accuracy": 0.6772357723577236,
+      "brier": 0.2097129840746686,
+      "log_loss": 0.6081283474893375,
+      "games": 1230
+    },
+    "chosen": {
+      "accuracy": 0.6853658536585366,
+      "brier": 0.2055744064809186,
+      "log_loss": 0.5982394938842767,
+      "games": 1230
+    },
+    "brier_difference": -0.004138577593749864,
+    "interval": [
+      -0.006896205779386742,
+      -0.00157075105042811
+    ]
+  }
+}

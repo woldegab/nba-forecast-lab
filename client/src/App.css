@@ -293,6 +293,13 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 }
 
 
+/* ---------- today: stepping through days ---------- */
+.day-nav { display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+.day-nav .round { width: 36px; height: 36px; font-size: 20px; }
+.day-nav-date { margin-top: 0; min-width: 15ch; text-align: center; }
+.day-nav .text-link { margin-left: 6px; font-size: 15px; }
+.past-note { margin: -6px 0 16px; max-width: 70ch; }
+
 /* ---------- loading placeholders ---------- */
 .bone { display: block; border-radius: 8px; background: var(--surface); position: relative; overflow: hidden; }
 .bone::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);

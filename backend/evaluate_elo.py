@@ -3,7 +3,7 @@
 import argparse
 from collections import Counter, defaultdict
 import csv
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from itertools import groupby
 import hashlib
 import json
@@ -15,6 +15,9 @@ from import_games import DEFAULT_DB
 
 # Fixed before evaluation; deliberately no search against the test season.
 PARAMETERS = dict(initial_rating=1500.0, k=20.0, home_advantage=65.0, retention=0.75)
+# Optional extensions, off unless a parameter set turns them on (see experiment_model.py):
+#   margin_of_victory: scale each update by how decisive the win was.
+#   back_to_back: Elo points subtracted from a team that also played the previous day.
 SEASONS = ("2023-24", "2024-25", "2025-26")
 
 
@@ -25,15 +28,46 @@ def win_probability(home_rating, away_rating, neutral_site, parameters=None):
     return 1 / (1 + 10 ** ((away_rating - home_rating - advantage) / 400))
 
 
-def backtest(games, parameters=None, ratings=None):
+def played_yesterday(team, game_date, last_played):
+    """True when the team's previous game was the day before game_date."""
+    previous = last_played.get(team)
+    return previous is not None and date.fromisoformat(game_date) - date.fromisoformat(previous) == timedelta(days=1)
+
+
+def pregame_ratings(game, ratings, last_played, parameters):
+    """Ratings used for the forecast: stored ratings minus any back-to-back penalty."""
+    p, initial = parameters, parameters["initial_rating"]
+    penalty = p.get("back_to_back", 0.0)
+    home = ratings.get(game["home_team_id"], initial)
+    away = ratings.get(game["away_team_id"], initial)
+    if penalty:
+        home -= penalty * played_yesterday(game["home_team_id"], game["game_date"], last_played)
+        away -= penalty * played_yesterday(game["away_team_id"], game["game_date"], last_played)
+    return home, away
+
+
+def margin_multiplier(margin, winner_edge):
+    """FiveThirtyEight's NBA margin-of-victory factor.
+
+    Bigger wins count more, with diminishing returns; the winner's pregame edge
+    (Elo points, including home court) shrinks it so favorites' blowouts don't
+    inflate ratings.
+    """
+    return (abs(margin) + 3) ** 0.8 / (7.5 + 0.006 * winner_edge)
+
+
+def backtest(games, parameters=None, ratings=None, last_played=None):
     """Forecast each date from earlier results only.
 
     Pass a ratings dict to start from existing ratings; it is updated in place,
-    so the caller can read end-of-run ratings afterward.
+    so the caller can read end-of-run ratings afterward. last_played (team ->
+    last game date) is updated the same way, for back-to-back detection.
     """
     p = PARAMETERS if parameters is None else parameters
     if ratings is None:
         ratings = {}
+    if last_played is None:
+        last_played = {}
     ratings_get = lambda team: ratings.setdefault(team, p["initial_rating"])
     predictions = []
     previous_season = None
@@ -44,9 +78,12 @@ def backtest(games, parameters=None, ratings=None):
                 ratings[team] = p["initial_rating"] + p["retention"] * (ratings[team] - p["initial_rating"])
         previous_season = season
         updates = defaultdict(float)
-        for game in daily_games:
+        daily_games_list = list(daily_games)
+        for game in daily_games_list:
             home, away = game["home_team_id"], game["away_team_id"]
-            probability = win_probability(ratings_get(home), ratings_get(away), game["neutral_site"], p)
+            ratings_get(home), ratings_get(away)
+            home_pre, away_pre = pregame_ratings(game, ratings, last_played, p)
+            probability = win_probability(home_pre, away_pre, game["neutral_site"], p)
             actual = int(game["home_score"] > game["away_score"])
             predictions.append(dict(game_id=game["game_id"], season=season,
                 game_date=game["game_date"], home_team=game["home_team"],
@@ -55,11 +92,16 @@ def backtest(games, parameters=None, ratings=None):
                 home_win_probability=probability, actual_home_win=actual,
                 home_score=game["home_score"], away_score=game["away_score"]))
             delta = p["k"] * (actual - probability)
+            if p.get("margin_of_victory"):
+                edge = home_pre - away_pre + (0 if game["neutral_site"] else p["home_advantage"])
+                delta *= margin_multiplier(game["home_score"] - game["away_score"], edge if actual else -edge)
             updates[home] += delta
             updates[away] -= delta
         # No same-day result can affect another same-day forecast.
         for team, delta in updates.items():
             ratings[team] += delta
+        for game in daily_games_list:
+            last_played[game["home_team_id"]] = last_played[game["away_team_id"]] = game["game_date"]
     return predictions
 
 

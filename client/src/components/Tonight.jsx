@@ -65,6 +65,41 @@ function FeaturedGame({ game }) {
   </article>;
 }
 
+// One earlier day of the season, with how the forecasts did.
+function PastDay({ date }) {
+  const [state, setState] = useState({ loading: true });
+  useEffect(() => {
+    const controller = new AbortController();
+    getData(`live/day?date=${date}`, controller.signal)
+      .then((data) => setState({ games: data.games }))
+      .catch((error) => { if (error.name !== 'AbortError') setState({ error: error.message }); });
+    return () => controller.abort();
+  }, [date]);
+  if (state.loading) return <Loading label="Loading games"><GameSkeletons count={3} /></Loading>;
+  if (state.error) return <div className="notice" role="alert"><p>{state.error}</p></div>;
+  const finished = state.games.filter((g) => g.correct !== null);
+  const live = finished.filter((g) => g.mode === 'live');
+  const backfill = state.games.filter((g) => g.mode === 'backfill').length;
+  return <section aria-label={`Games on ${longDate(date)}`}>
+    <h2 className="day-heading">{finished.length
+      ? <>{finished.filter((g) => g.correct).length} of {finished.length} correct</>
+      : 'No final scores yet'}</h2>
+    {backfill > 0 && <p className="muted small past-note">{backfill === state.games.length
+      ? 'These games were scored afterward, using only results from before each game. They aren\'t part of the record.'
+      : `${backfill} of these games were scored afterward and aren't part of the record; the other ${live.length} were saved before tip-off.`}</p>}
+    <div className="card-grid">{state.games.map((game) => <GameCard key={game.game_id} game={game} />)}</div>
+  </section>;
+}
+
+function DayNav({ shown, previous, next, isToday, onPick }) {
+  return <div className="day-nav">
+    <button className="round" aria-label="Previous day with games" disabled={!previous} onClick={() => onPick(previous)}>‹</button>
+    <p className="lede day-nav-date" aria-live="polite">{longDate(shown)}</p>
+    <button className="round" aria-label="Next day with games" disabled={!next} onClick={() => onPick(next)}>›</button>
+    {!isToday && <button className="text-link" onClick={() => onPick(null)}>Back to today</button>}
+  </div>;
+}
+
 function EmptyDay({ next }) {
   return <section className="empty-day">
     <Court />
@@ -78,6 +113,13 @@ function EmptyDay({ next }) {
 export default function Tonight({ onArchive }) {
   const [state, setState] = useState({ loading: true });
   const [attempt, setAttempt] = useState(0);
+  const [day, setDay] = useState(null); // null means today
+  const [days, setDays] = useState([]);
+  useEffect(() => {
+    const controller = new AbortController();
+    getData('live/days', controller.signal).then((data) => setDays(data.days.map((d) => d.date))).catch(() => {});
+    return () => controller.abort();
+  }, [attempt]);
   useEffect(() => {
     const controller = new AbortController();
     getData('live?recent=60', controller.signal)
@@ -99,16 +141,22 @@ export default function Tonight({ onArchive }) {
     ? upcoming.reduce((best, g) => (Math.abs(g.home_win_probability - 0.5) < Math.abs(best.home_win_probability - 0.5) ? g : best))
     : null;
   const others = upcoming.filter((g) => g !== featured);
+  const todayDate = today || new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  const shown = day || todayDate;
+  const previous = days.filter((d) => d < shown).at(-1);
+  const next = day ? (days.find((d) => d > shown && d < todayDate) || todayDate) : null;
+  const pick = (picked) => setDay(picked === todayDate ? null : picked);
   return <>
     <section className="intro">
       <div>
-        <h1>{today ? "Today's games" : 'Today'}</h1>
-        <p className="lede">{today ? longDate(today) : longDate(new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }))}</p>
+        <h1>{day ? 'Earlier this season' : today ? "Today's games" : 'Today'}</h1>
+        <DayNav shown={shown} previous={previous} next={next} isToday={!day} onPick={pick} />
         <p className="intro-note">Each forecast is saved before tip-off and never changed, so the record can't be adjusted after the fact.</p>
       </div>
       <RecordCard summary={summary} />
     </section>
 
+    {day ? <PastDay key={day} date={day} /> : <>
     {upcoming.length === 0 && <EmptyDay next={summary.next_games} />}
     {featured && <FeaturedGame game={featured} />}
     {others.length > 0 && <div className="card-grid">{others.map((game) => <GameCard key={game.game_id} game={game} animate />)}</div>}
@@ -124,6 +172,7 @@ export default function Tonight({ onArchive }) {
       })}
     </section>}
 
+    </>}
     {summary.backfill.games > 0 && <p className="footnote">
       {summary.backfill.games} games from earlier this season were scored afterward, using only results from before each game. They aren't part of the record.
     </p>}

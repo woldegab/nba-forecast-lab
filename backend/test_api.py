@@ -109,6 +109,17 @@ class LiveAndStaticTests(unittest.TestCase):
             self.assertEqual(recent['actual_winner'], 'BBB')
             self.assertIsNone(body['upcoming'][0]['correct'])
 
+    def test_live_days_and_single_day(self):
+        with self.client() as client:
+            days = client.get('/api/live/days').json()['days']
+            self.assertEqual([d['date'] for d in days], ['2026-11-25', '2026-11-26'])
+            self.assertEqual((days[0]['finished'], days[0]['correct']), (1, 0))
+            self.assertEqual(days[1]['finished'], 0)
+            day = client.get('/api/live/day?date=2026-11-25').json()
+            self.assertEqual([g['game_id'] for g in day['games']], ['1'])
+            self.assertEqual(client.get('/api/live/day?date=2026-12-25').json()['games'], [])
+            self.assertEqual(client.get('/api/live/day?date=nope').status_code, 422)
+
     def test_missing_live_files_return_503(self):
         with self.client(self.path / 'nothing') as client:
             self.assertEqual(client.get('/api/live').status_code, 503)
