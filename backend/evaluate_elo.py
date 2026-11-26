@@ -18,9 +18,23 @@ PARAMETERS = dict(initial_rating=1500.0, k=20.0, home_advantage=65.0, retention=
 SEASONS = ("2023-24", "2024-25", "2025-26")
 
 
-def backtest(games, parameters=None):
+def win_probability(home_rating, away_rating, neutral_site, parameters=None):
+    """Home-team win probability from pregame ratings and venue."""
     p = PARAMETERS if parameters is None else parameters
-    ratings = defaultdict(lambda: p["initial_rating"])
+    advantage = 0 if neutral_site else p["home_advantage"]
+    return 1 / (1 + 10 ** ((away_rating - home_rating - advantage) / 400))
+
+
+def backtest(games, parameters=None, ratings=None):
+    """Forecast each date from earlier results only.
+
+    Pass a ratings dict to start from existing ratings; it is updated in place,
+    so the caller can read end-of-run ratings afterward.
+    """
+    p = PARAMETERS if parameters is None else parameters
+    if ratings is None:
+        ratings = {}
+    ratings_get = lambda team: ratings.setdefault(team, p["initial_rating"])
     predictions = []
     previous_season = None
     ordered = sorted(games, key=lambda g: (g["game_date"], g["game_id"]))
@@ -32,8 +46,7 @@ def backtest(games, parameters=None):
         updates = defaultdict(float)
         for game in daily_games:
             home, away = game["home_team_id"], game["away_team_id"]
-            advantage = 0 if game["neutral_site"] else p["home_advantage"]
-            probability = 1 / (1 + 10 ** ((ratings[away] - ratings[home] - advantage) / 400))
+            probability = win_probability(ratings_get(home), ratings_get(away), game["neutral_site"], p)
             actual = int(game["home_score"] > game["away_score"])
             predictions.append(dict(game_id=game["game_id"], season=season,
                 game_date=game["game_date"], home_team=game["home_team"],

@@ -1,8 +1,13 @@
 # NBA Forecast Lab
 
-A React dashboard for exploring historical NBA win probabilities and evaluating
-an Elo baseline. Includes 2023-24 warm-up, 2024-25 development, and 2025-26 initial
-test seasons. These are historical backtests, not live predictions.
+Daily NBA win probabilities from an Elo model, with a public track record.
+
+- **Today:** forecasts for today's 2026-27 games, saved before tip-off by a
+  scheduled GitHub Action and never edited afterward.
+- **Past seasons:** historical backtests for 2023-24 (warm-up), 2024-25 (development)
+  and 2025-26 (held-out test).
+- **Players:** player cards with recent averages, full game logs, and head-to-head
+  history before any past game.
 
 ## Run locally
 
@@ -68,9 +73,51 @@ npm --prefix client run lint
 npm --prefix client run build
 ```
 
-For deployment, serve `/api` through the same origin or configure an appropriate
-reverse proxy. The Vite proxy is a local development/preview convenience; static
-hosting alone will not run the Python service. No deployment has been configured.
+The same checks run on every push and pull request in GitHub Actions
+(`.github/workflows/ci.yml`).
+
+## Live forecasts (2026-27)
+
+`backend/live_forecast.py` keeps an append-only ledger in `backend/live/`:
+
+```sh
+# Once, locally, after importing all three archived seasons:
+backend/.venv/bin/python backend/live_forecast.py init
+# Daily (the GitHub Action does this at 15:00 UTC):
+backend/.venv/bin/python backend/live_forecast.py update
+```
+
+`init` replays the archive and saves offseason-regressed starting ratings.
+`update` downloads this season's results and yesterday's and today's scoreboards
+from stats.nba.com (through `nba_api`, like the importers), fills in final scores, and
+records a forecast for every game on today's Eastern date that has not tipped off. A forecast row is
+never rewritten; later runs only add the result. Ratings use finished games from
+earlier dates only, matching the backtest. Games that ended before the ledger first
+saw them are stored as `backfill` and excluded from the live record.
+
+The workflow commits the ledger each morning, so the commit history shows every
+forecast existed before its game. Offline runs with a saved NBA season-schedule file:
+`update --input schedule.json --now 2026-11-26T15:00:00+00:00`.
+
+Limitations: postponed games keep their original forecast. Game logs have no tip-off
+time, so backfilled games are stamped midnight Eastern. Upcoming neutral-site games
+need an entry in `neutral_sites.json`; finished ones are detected automatically.
+
+## Deployment
+
+One Docker image builds the React site and serves it from FastAPI, so the API and
+pages share an origin. On Render: **New > Blueprint**, choose this repo
+(`render.yaml`). Each push to `main`, including the daily forecast commit,
+redeploys. Any Docker host works:
+
+```sh
+docker build -t nba-forecast-lab .
+docker run -p 8000:8000 nba-forecast-lab
+```
+
+The site needs the generated artifacts committed: `backend/data/backtest/`,
+`backend/data/nba.sqlite3`, `backend/data/player_points.json` and `backend/live/`.
+Raw API downloads stay ignored.
 
 See [model documentation](backend/README.md) and [first evaluation results](backend/BASELINE_RESULTS.md).
 

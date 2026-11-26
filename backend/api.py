@@ -7,10 +7,17 @@ import json
 import math
 from pathlib import Path
 
+import os
+
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from player_api import player_router
 
 DATA_DIR = Path(__file__).parent / "data" / "backtest"
+LIVE_DIR = Path(__file__).parent / "live"
+# Built React app; served by the API in production so one service hosts both.
+STATIC_DIR = Path(os.environ.get("STATIC_DIR", Path(__file__).parent.parent / "client" / "dist"))
 
 
 def load_snapshot(folder):
@@ -55,7 +62,33 @@ def load_snapshot(folder):
     return report, dict(games_by_date), seasons
 
 
-def create_app(data_dir=DATA_DIR):
+def load_live(folder):
+    """Live ledger and summary written by live_forecast.py."""
+    summary = json.loads((folder / "summary.json").read_text())
+    with (folder / f"predictions_{summary['season']}.csv").open(newline="") as file:
+        rows = list(csv.DictReader(file))
+    games = []
+    for row in rows:
+        p = float(row["home_win_probability"])
+        if not math.isfinite(p) or not 0 <= p <= 1:
+            raise ValueError("Invalid live probability")
+        final = row["actual_home_win"] != ""
+        actual = int(row["actual_home_win"]) if final else None
+        games.append(dict(game_id=row["game_id"], date=row["game_date"], tipoff_utc=row["tipoff_utc"],
+            home_team=row["home_team"], away_team=row["away_team"],
+            neutral_site=bool(int(row["neutral_site"])), mode=row["mode"],
+            predicted_at_utc=row["predicted_at_utc"],
+            home_rating=float(row["home_rating"]), away_rating=float(row["away_rating"]),
+            home_win_probability=p, away_win_probability=1 - p,
+            predicted_winner=row["home_team"] if p >= 0.5 else row["away_team"],
+            home_score=int(row["home_score"]) if final else None,
+            away_score=int(row["away_score"]) if final else None,
+            actual_winner=(row["home_team"] if actual else row["away_team"]) if final else None,
+            correct=((p >= 0.5) == bool(actual)) if final else None))
+    return summary, games
+
+
+def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
     @asynccontextmanager
     async def lifespan(app):
         try:
@@ -87,6 +120,29 @@ def create_app(data_dir=DATA_DIR):
     def performance():
         report, _, _ = snapshot()
         return report
+
+    @app.get("/api/live")
+    def live(recent: int = Query(40, ge=0, le=200)):
+        try:
+            summary, games = load_live(Path(live_dir))
+        except (OSError, ValueError, KeyError, TypeError):
+            raise HTTPException(503, "Live forecasts are not available yet. Run backend/live_forecast.py update.")
+        upcoming = [g for g in games if g["home_score"] is None]
+        finished = [g for g in games if g["home_score"] is not None and g["mode"] == "live"]
+        return dict(summary=summary, upcoming=upcoming, recent=finished[-recent:][::-1] if recent else [])
+
+    static = Path(static_dir)
+    if (static / "index.html").exists():
+        app.mount("/assets", StaticFiles(directory=static / "assets"), name="assets")
+
+        @app.get("/{path:path}", include_in_schema=False)
+        def frontend(path: str):
+            if path.startswith("api/"):
+                raise HTTPException(404, "Not found")
+            candidate = (static / path).resolve()
+            if path and candidate.is_file() and static.resolve() in candidate.parents:
+                return FileResponse(candidate)
+            return FileResponse(static / "index.html")
 
     return app
 
