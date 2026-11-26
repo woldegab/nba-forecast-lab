@@ -14,10 +14,14 @@ import sqlite3
 from import_games import DEFAULT_DB
 
 # Fixed before evaluation; deliberately no search against the test season.
-PARAMETERS = dict(initial_rating=1500.0, k=20.0, home_advantage=65.0, retention=0.75)
-# Optional extensions, off unless a parameter set turns them on (see experiment_model.py):
+# K, home advantage and retention were fixed before the first evaluation. The two
+# extensions were chosen on 2024-25 and confirmed once on 2025-26 (experiment_model.py,
+# MODEL_EXPERIMENT_RESULTS.md):
 #   margin_of_victory: scale each update by how decisive the win was.
 #   back_to_back: Elo points subtracted from a team that also played the previous day.
+ORIGINAL_PARAMETERS = dict(initial_rating=1500.0, k=20.0, home_advantage=65.0, retention=0.75,
+                           margin_of_victory=False, back_to_back=0.0)
+PARAMETERS = dict(ORIGINAL_PARAMETERS, margin_of_victory=True, back_to_back=50.0)
 SEASONS = ("2023-24", "2024-25", "2025-26")
 
 
@@ -161,13 +165,15 @@ def main():
             coin_flip_brier=0.25,
         )
     digest = hashlib.sha256(json.dumps(games, sort_keys=True).encode()).hexdigest()
-    report = dict(generated_at=datetime.now(timezone.utc).isoformat(), data_sha256=digest,
+    experiment_file = Path(__file__).parent / "MODEL_EXPERIMENT_RESULTS.json"
+    experiment = json.loads(experiment_file.read_text()) if experiment_file.exists() else None
+    report = dict(experiment=experiment, generated_at=datetime.now(timezone.utc).isoformat(), data_sha256=digest,
         parameters=PARAMETERS, warmup_season=SEASONS[0], development_season=SEASONS[1],
         test_season=SEASONS[2], coverage=coverage, home_rate_from_warmup=home_rate, results=results,
-        protocol="Fixed parameters; predict before updating; updates after each date; ratings carry forward with offseason regression. No parameter tuning on either evaluation season.",
+        protocol="Predict before updating; updates after each date; ratings carry forward with offseason regression. K, home advantage and retention were fixed in advance; margin of victory and the back-to-back penalty were chosen on 2024-25 only and scored once on 2025-26 (see MODEL_EXPERIMENT_RESULTS.md).",
         limitations=["Historical backtest using current corrected records, not archived pregame snapshots.",
                      "Ratings update after prior test games; this evaluates daily sequential forecasting, not preseason forecasts.",
-                     "No injuries, rosters, player projections, rest, margin-of-victory or playoff updates.",
+                     "No injuries, rosters, player projections, travel or playoff updates. Rest covers back-to-backs only.",
                      "Neutral-site registry is manually maintained; home-court advantage is zero for listed games.",
                      "2025-26 has now been evaluated; repeated development against it would make it development data."])
     args.output.mkdir(parents=True, exist_ok=True)
@@ -177,9 +183,10 @@ def main():
         writer = csv.DictWriter(file, fieldnames=fields)
         writer.writeheader()
         writer.writerows(predictions)
-    lines = ["# Initial Elo backtest", "", "Historical evaluation; not live predictions.", "",
+    lines = ["# Elo backtest", "", "Historical evaluation; not live predictions.", "",
              "2023-24 initializes ratings; 2024-25 is development; 2025-26 is the held-out evaluation.",
-             "Parameters were fixed before evaluation: K=20, home advantage=65 Elo points, offseason retention=75%.", "",
+             "K=20, home advantage=65 Elo points and offseason retention=75% were fixed before evaluation.",
+             "Margin of victory and a 50-point back-to-back penalty were chosen on 2024-25 and scored once on 2025-26.", "",
              "| Season | Games | Elo accuracy | Home-pick accuracy | Elo Brier | Home-rate Brier | Elo log loss |",
              "|---|---:|---:|---:|---:|---:|---:|"]
     for season, result in results.items():

@@ -156,8 +156,8 @@ function Model({ data }) {
   const p = report.parameters;
   const steps = [
     ['Every team gets a rating', `Teams start at ${p.initial_rating.toLocaleString()}. The ${report.warmup_season} season sets the first real ratings.`],
-    ['Compare ratings before each game', `The bigger the gap, the bigger the favorite. Home teams get ${p.home_advantage} extra points; neutral sites get none.`],
-    ['Update after each day', `Winners take points from losers, more for an upset. Games on the same day never affect each other.`],
+    ['Compare ratings before each game', `The bigger the gap, the bigger the favorite. Home teams get ${p.home_advantage} extra points; neutral sites get none.${p.back_to_back ? ` A team playing the second night of a back-to-back loses ${p.back_to_back}.` : ''}`],
+    ['Update after each day', `Winners take points from losers, more for an upset${p.margin_of_victory ? ' or a bigger win' : ''}. Games on the same day never affect each other.`],
     ['Reset a little each summer', `Ratings keep ${p.retention * 100}% of their distance from average between seasons.`],
   ];
   return <>
@@ -185,9 +185,22 @@ function Model({ data }) {
       <h2>The model in four steps</h2>
       <ol className="steps">{steps.map(([title, text]) => <li key={title}><h3>{title}</h3><p>{text}</p></li>)}</ol>
     </section>
+    {report.experiment?.held_out && <section className="section narrow">
+      <h2>How the model was improved</h2>
+      <p>The first version ignored how big each win was and whether a team played the night before. Both ideas were tried on the 2024-25 season only, and each was kept only if it clearly helped there. The combined version was then scored once on 2025-26, a season it hadn't seen.</p>
+      <div className="table-scroll"><table><caption className="sr-only">Held-out season, before and after</caption>
+        <thead><tr><th scope="col">{report.test_season}</th><th scope="col" className="num">Correct picks</th><th scope="col" className="num">Brier score</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">First version</th><td className="num">{pct(report.experiment.held_out.current.accuracy)}</td><td className="num">{report.experiment.held_out.current.brier.toFixed(4)}</td></tr>
+          <tr><th scope="row">With margin of victory and rest</th><td className="num strong">{pct(report.experiment.held_out.chosen.accuracy)}</td><td className="num strong">{report.experiment.held_out.chosen.brier.toFixed(4)}</td></tr>
+        </tbody></table></div>
+      <p className="muted small">{report.experiment.held_out.interval[1] < 0
+        ? <>The 95% range for the Brier improvement is {(-report.experiment.held_out.interval[1]).toFixed(4)} to {(-report.experiment.held_out.interval[0]).toFixed(4)}, so it is unlikely to be luck.</>
+        : <>The 95% range for the Brier change includes zero, so the difference could be luck.</>} Teams on a back-to-back won {pct(report.experiment.rest_facts.back_to_back_win_rate)} of the time in 2024-25.</p>
+    </section>}
     <section className="section narrow">
       <h2>What it doesn't know</h2>
-      <p>Injuries, lineups, rest days, travel and player stats. Past-season forecasts are rebuilt from today's records, not saved at the time. That's why the live record exists: it can't be rebuilt after the fact.</p>
+      <p>Injuries, lineups, travel and player stats. Rest only covers back-to-backs. Past-season forecasts are rebuilt from today's records, not saved at the time. That's why the live record exists: it can't be rebuilt after the fact.</p>
     </section>
   </>;
 }

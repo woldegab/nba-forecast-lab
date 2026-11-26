@@ -13,6 +13,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from player_api import player_router
+from evaluate_elo import ORIGINAL_PARAMETERS
 from insights import calibration, power_rankings, team_histories
 
 DATA_DIR = Path(__file__).parent / "data" / "backtest"
@@ -130,7 +131,20 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
             raise HTTPException(503, "Live forecasts are not available yet. Run backend/live_forecast.py update.")
         upcoming = [g for g in games if g["home_score"] is None]
         finished = [g for g in games if g["home_score"] is not None and g["mode"] == "live"]
-        return dict(summary=summary, upcoming=upcoming, recent=finished[-recent:][::-1] if recent else [])
+        return dict(summary=summary, upcoming=upcoming, recent=finished[-recent:][::-1] if recent else [],
+                    model_change=model_change())
+
+    def model_change():
+        """When the live season switched models: forecasts saved after `since` use the new one."""
+        try:
+            start = json.loads((Path(live_dir) / "start_ratings.json").read_text())
+        except (OSError, ValueError):
+            return None
+        current = dict(ORIGINAL_PARAMETERS, **start.get("parameters", {}))
+        if current == ORIGINAL_PARAMETERS:
+            return None
+        return dict(since=start["generated_at"], margin_of_victory=current["margin_of_victory"],
+                    back_to_back=current["back_to_back"])
 
     def live_games():
         try:
@@ -159,17 +173,22 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
         return dict(date=selected, games=[g for g in games if g["date"] == selected])
 
     def team_sources():
-        """{season: (games, K, starting ratings by team or None)} from the archive and live ledger."""
+        """{season: (games, history options, starting ratings by team or None)} from the archive and live ledger."""
         sources = {}
         if app.state.snapshot is not None:
             report, by_date, _ = app.state.snapshot
             archive = [g for day in by_date.values() for g in day]
             for season in {g["season"] for g in archive}:
-                sources[season] = ([g for g in archive if g["season"] == season], report["parameters"]["k"], None)
+                sources[season] = ([g for g in archive if g["season"] == season],
+                                   dict(parameters=dict(ORIGINAL_PARAMETERS, **report["parameters"])), None)
         try:
             summary, games = load_live(Path(live_dir))
             start = json.loads((Path(live_dir) / "start_ratings.json").read_text())
-            sources[summary["season"]] = (games, start["parameters"]["k"],
+            change = model_change()
+            options = dict(parameters=dict(ORIGINAL_PARAMETERS, **start["parameters"]))
+            if change:
+                options.update(earlier=ORIGINAL_PARAMETERS, since=change["since"])
+            sources[summary["season"]] = (games, options,
                                           {v["team"]: v["rating"] for v in start["ratings"].values()})
         except (OSError, ValueError, KeyError, TypeError):
             pass
@@ -188,15 +207,15 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
     def teams(season: str | None = None):
         sources = team_sources()
         chosen, seasons = pick_season(sources, season)
-        games, k, starting = sources[chosen]
-        return dict(season=chosen, seasons=seasons, teams=power_rankings(team_histories(games, k), starting))
+        games, options, starting = sources[chosen]
+        return dict(season=chosen, seasons=seasons, teams=power_rankings(team_histories(games, **options), starting))
 
     @app.get("/api/teams/{team}")
     def team(team: str, season: str | None = None):
         sources = team_sources()
         chosen, seasons = pick_season(sources, season)
-        games, k, starting = sources[chosen]
-        histories = team_histories(games, k)
+        games, options, starting = sources[chosen]
+        histories = team_histories(games, **options)
         ranking = next((row for row in power_rankings(histories, starting) if row["team"] == team.upper()), None)
         if ranking is None:
             raise HTTPException(404, "Team not found for this season")

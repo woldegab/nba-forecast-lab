@@ -29,7 +29,7 @@ import sys
 import time
 from zoneinfo import ZoneInfo
 
-from evaluate_elo import PARAMETERS, SEASONS, audit, backtest, metrics, win_probability
+from evaluate_elo import PARAMETERS, SEASONS, audit, backtest, metrics, pregame_ratings, win_probability
 from import_games import DEFAULT_DB, NEUTRAL_SITES
 
 LIVE_SEASON = "2026-27"
@@ -402,7 +402,8 @@ def update(schedule_games, start, ledger, now):
     saved = [ledger_game(r) for r in ledger.values() if r["home_score"] != "" and r["game_date"] < today]
     new_finals = [g for g in schedule_games if g["status"] == FINAL and g["game_date"] < today and not is_known(g)]
     ratings = {int(team): value["rating"] for team, value in start["ratings"].items()}
-    replay = backtest([dict(g, season=LIVE_SEASON) for g in saved + new_finals], start["parameters"], ratings)
+    last_played = {}
+    replay = backtest([dict(g, season=LIVE_SEASON) for g in saved + new_finals], start["parameters"], ratings, last_played)
 
     # 3. Games that finished before the ledger saw them: backfill, labeled as such.
     new_ids = {g["game_id"] for g in new_finals}
@@ -427,7 +428,9 @@ def update(schedule_games, start, ledger, now):
                 and game["tipoff"] > now and not is_known(game)):
             home = ratings.get(game["home_team_id"], start["parameters"]["initial_rating"])
             away = ratings.get(game["away_team_id"], start["parameters"]["initial_rating"])
-            probability = win_probability(home, away, game["neutral_site"], start["parameters"])
+            # Stored ratings stay unadjusted; the back-to-back penalty only enters the probability.
+            home_pre, away_pre = pregame_ratings(game, ratings, last_played, start["parameters"])
+            probability = win_probability(home_pre, away_pre, game["neutral_site"], start["parameters"])
             ledger[game["game_id"]] = prediction_row(game, home, away, probability, now, "live")
     return ledger, notes
 

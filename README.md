@@ -12,18 +12,28 @@ the commit history proves each one existed before its game was played.
 
 ## Results
 
-The model was tuned on 2024-25 and then scored once on 2025-26, a season it had not seen.
+The model was built on 2024-25 and then scored on 2025-26, a season it had not seen.
 
 | Season | Games | Correct picks | Always pick home team | Brier score |
 |---|---:|---:|---:|---:|
-| 2024-25 (development) | 1,230 | 65.3% | 54.4% | 0.214 |
-| 2025-26 (held-out test) | 1,230 | **67.7%** | 55.4% | **0.210** |
+| 2024-25 (development) | 1,230 | 67.2% | 54.4% | 0.210 |
+| 2025-26 (held-out test) | 1,230 | **68.5%** | 55.4% | **0.206** |
 | 2026-27 (live) | updated daily | [see the site](https://nba-forecast-lab.onrender.com) | | |
 
 Brier score measures the quality of the probabilities, not just the picks; lower is better, and
 guessing 50/50 every game scores 0.250. The site's *How it works* page also has a calibration
 chart: when the model gives a team a 70% chance, that team should win about 70% of the time.
-Full numbers: [backtest results](backend/BASELINE_RESULTS.md).
+
+**How the model improved.** The first version, plain Elo, got 67.7% right on the held-out season
+with a Brier score of 0.2097. Two ideas were then tested on 2024-25 only, each kept only if it
+clearly helped there: weighting wins by margin of victory, and a 50-point penalty for teams on the
+second night of a back-to-back (those teams won just 44.7% of the time in 2024-25). Scored once
+on 2025-26, the new version reached 68.5% and 0.2056. The 95% interval for the Brier improvement,
+0.0016 to 0.0069, excludes zero, so the gain is unlikely to be luck. Live forecasts switched to
+the new version in November 2026; earlier live forecasts are unchanged.
+
+Details: [experiment results](backend/MODEL_EXPERIMENT_RESULTS.md) and the
+[first version's backtest](backend/BASELINE_RESULTS.md).
 
 ## What's on the site
 
@@ -35,9 +45,11 @@ Full numbers: [backtest results](backend/BASELINE_RESULTS.md).
 
 ## How it works
 
-**The model.** Every team has a rating. Before a game, the rating gap (plus 65 points for the
-home team) becomes a win probability. After each day, winners take points from losers, more for
-an upset (K = 20). Between seasons, ratings keep 75% of their distance from the average.
+**The model.** Every team has a rating. Before a game, the rating gap becomes a win probability,
+after adding 65 points for the home team and subtracting 50 from a team that played the night
+before. After each day, winners take points from losers (K = 20), more for an upset or a bigger
+win, using FiveThirtyEight's margin-of-victory factor. Between seasons, ratings keep 75% of their
+distance from the average.
 Games on the same day never affect each other's forecasts.
 
 **The data pipeline.**
@@ -147,7 +159,7 @@ docker run -p 8000:8000 nba-forecast-lab
 
 ## Limitations
 
-- No injuries, lineups, rest days, travel or margin of victory.
+- No injuries, lineups or travel. Rest only covers back-to-backs.
 - Past-season forecasts are rebuilt from today's records, not saved at the time. That's what
   the live record is for.
 - Player-points projections ([results](backend/PLAYER_POINTS_RESULTS.md)) assume the player plays.

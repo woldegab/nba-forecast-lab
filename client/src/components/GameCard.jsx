@@ -27,6 +27,16 @@ function TeamLine({ abbreviation, probability, score, favorite, winner, reveal, 
 
 export { Logo };
 
+// The forecast's edge in Elo points, compared with the ratings plus home court, shows
+// whether a back-to-back penalty was applied (stored ratings don't include it).
+function restAdjustment(game) {
+  const p = Math.min(Math.max(game.home_win_probability, 1e-9), 1 - 1e-9);
+  const implied = 400 * Math.log10(p / (1 - p));
+  const expected = game.home_rating - game.away_rating + (game.neutral_site ? 0 : 65);
+  const gap = Math.round(implied - expected);
+  return Math.abs(gap) < 5 ? null : { side: gap < 0 ? 'home' : 'away', points: Math.abs(gap) };
+}
+
 export default function GameCard({ game, showResults = true, onExplore, animate = false }) {
   // Bars start even and grow to the forecast split once, when the card first appears.
   const [grown, setGrown] = useState(!animate);
@@ -39,6 +49,9 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
   const reveal = final && showResults;
   const away = teamInfo(game.away_team);
   const home = teamInfo(game.home_team);
+  const rest = restAdjustment(game);
+  const tired = rest && (rest.side === 'home' ? home.name : away.name);
+  const restPenalty = rest?.points;
   const even = isEven(game);
   const homeFavored = !even && game.home_win_probability > 0.5;
   const awayFavored = !even && game.home_win_probability < 0.5;
@@ -64,6 +77,7 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
         <summary>Why this forecast</summary>
         <p>{away.name} are rated {Math.round(game.away_rating)} and the {home.name} {Math.round(game.home_rating)}.
           {game.neutral_site ? ' Neither team gets a home-court boost at a neutral site.' : ' The home team gets a 65-point boost.'}
+          {tired && ` The ${tired} played the night before, so they lose ${restPenalty} points for this game.`}
           {' '}Ratings only count games from earlier days.{even && ' When a game is a true 50/50, the home team counts as the pick.'}</p>
       </details>
       {onExplore && <button className="text-link" onClick={onExplore}>Player matchups</button>}

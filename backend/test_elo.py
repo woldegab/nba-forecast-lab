@@ -34,7 +34,8 @@ class EloTests(unittest.TestCase):
     def test_offseason_regression(self):
         second = game('2', '2024-10-24')
         second['season'] = '2024-25'
-        row = backtest([game('1', '2023-10-24', neutral=1), second])[1]
+        from evaluate_elo import ORIGINAL_PARAMETERS
+        row = backtest([game('1', '2023-10-24', neutral=1), second], ORIGINAL_PARAMETERS)[1]
         self.assertEqual(row['home_rating'], 1507.5)
         self.assertEqual(row['away_rating'], 1492.5)
 
@@ -54,14 +55,14 @@ class ExtensionTests(unittest.TestCase):
                     away_team_id=away, away_team=str(away), home_score=home_score, away_score=away_score, neutral_site=0)
 
     def test_defaults_ignore_margin_and_rest(self):
-        from evaluate_elo import PARAMETERS, backtest
+        from evaluate_elo import ORIGINAL_PARAMETERS as PARAMETERS, backtest
         close = [self.game("1", "2024-11-01", 1, 2, 101, 100), self.game("2", "2024-11-02", 1, 3, 100, 90)]
         blowout = [self.game("1", "2024-11-01", 1, 2, 140, 100), self.game("2", "2024-11-02", 1, 3, 100, 90)]
         self.assertEqual(backtest(close, PARAMETERS)[1]["home_win_probability"],
                          backtest(blowout, PARAMETERS)[1]["home_win_probability"])
 
     def test_margin_of_victory_rewards_blowouts_more(self):
-        from evaluate_elo import PARAMETERS, backtest
+        from evaluate_elo import ORIGINAL_PARAMETERS as PARAMETERS, backtest
         p = dict(PARAMETERS, margin_of_victory=True)
         close, blowout = {}, {}
         backtest([self.game("1", "2024-11-01", 1, 2, 101, 100)], p, close)
@@ -75,7 +76,7 @@ class ExtensionTests(unittest.TestCase):
         self.assertLess(margin_multiplier(20, 200), margin_multiplier(20, 0))
 
     def test_back_to_back_penalty_only_after_consecutive_days(self):
-        from evaluate_elo import PARAMETERS, backtest
+        from evaluate_elo import ORIGINAL_PARAMETERS as PARAMETERS, backtest
         p = dict(PARAMETERS, back_to_back=30.0)
         games = [self.game("1", "2024-11-01", 1, 2, 100, 90), self.game("2", "2024-11-01", 3, 4, 100, 90),
                  self.game("3", "2024-11-02", 1, 3, 100, 90),   # team 1 tired, team 3 tired

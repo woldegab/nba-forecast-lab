@@ -86,6 +86,17 @@ class UpdateTests(unittest.TestCase):
         self.assertEqual(live['mode'], 'live')
         self.assertLess(float(live['home_rating']), 1550.0)   # lost the Nov 24 game
 
+    def test_back_to_back_lowers_tired_teams_chance_but_not_stored_rating(self):
+        start = dict(START, parameters=dict(START['parameters'], back_to_back=50.0))
+        games = parse_schedule(schedule(
+            game('0022600001', '2026-11-26T00:30:00Z', home=1, away=3, status=3, scores=(100, 100 - 1)),  # Nov 25
+            game('0022600002', '2026-11-27T00:30:00Z', home=1, away=2)))                              # Nov 26
+        rested = update(games, START, {}, at('2026-11-26T15:00:00'))[0]['0022600002']
+        tired = update(games, start, {}, at('2026-11-26T15:00:00'))[0]['0022600002']
+        self.assertEqual(tired['home_rating'], rested['home_rating'])
+        drop = float(rested['home_win_probability']) - float(tired['home_win_probability'])
+        self.assertTrue(0.04 < drop < 0.09, drop)   # 50 Elo points near a 70% favorite
+
     def test_unfinished_earlier_game_blocks_new_forecasts(self):
         games = parse_schedule(schedule(
             game('0022600001', '2026-11-26T00:30:00Z', status=2),
@@ -110,7 +121,8 @@ class StartAndFilesTests(unittest.TestCase):
         archive = [dict(game_id='1', game_date='2026-01-01', season='2025-26', home_team_id=1,
                         away_team_id=2, home_team='AAA', away_team='BBB', home_score=110,
                         away_score=100, neutral_site=1)]
-        ratings = start_ratings(archive)
+        from evaluate_elo import ORIGINAL_PARAMETERS
+        ratings = start_ratings(archive, ORIGINAL_PARAMETERS)
         self.assertEqual(ratings['1'], dict(team='AAA', rating=1507.5))
         self.assertEqual(ratings['2'], dict(team='BBB', rating=1492.5))
 

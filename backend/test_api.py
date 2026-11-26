@@ -120,6 +120,18 @@ class LiveAndStaticTests(unittest.TestCase):
             self.assertEqual(client.get('/api/live/day?date=2026-12-25').json()['games'], [])
             self.assertEqual(client.get('/api/live/day?date=nope').status_code, 422)
 
+    def test_model_change_reported_after_switch(self):
+        with self.client() as client:
+            self.assertIsNone(client.get('/api/live').json()['model_change'])
+        (self.live / 'start_ratings.json').write_text(json.dumps(dict(generated_at='2026-11-26T22:00:00+00:00',
+            parameters=dict(k=20.0, margin_of_victory=True, back_to_back=50.0),
+            ratings={'1': dict(team='AAA', rating=1550.0), '2': dict(team='BBB', rating=1450.0)})))
+        with self.client() as client:
+            change = client.get('/api/live').json()['model_change']
+            self.assertEqual(change['since'], '2026-11-26T22:00:00+00:00')
+            self.assertEqual(change['back_to_back'], 50.0)
+            self.assertEqual(len(client.get('/api/teams').json()['teams']), 2)
+
     def test_missing_live_files_return_503(self):
         with self.client(self.path / 'nothing') as client:
             self.assertEqual(client.get('/api/live').status_code, 503)

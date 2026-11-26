@@ -10,17 +10,17 @@ def game(game_id, date, home, away, p, home_score=None, away_score=None, home_ra
 
 class InsightTests(unittest.TestCase):
     def test_rating_after_game_is_elo_update(self):
-        history = team_histories([game('1', '2026-11-01', 'AAA', 'BBB', 0.6, 100, 90)], k=20)
+        history = team_histories([game('1', '2026-11-01', 'AAA', 'BBB', 0.6, 100, 90)], 20)
         self.assertEqual(history['AAA'][0]['rating'], round(1500 + 20 * (1 - 0.6), 1))
         self.assertEqual(history['BBB'][0]['rating'], round(1500 + 20 * (0 - 0.4), 1))
         self.assertEqual((history['BBB'][0]['result'], history['BBB'][0]['score'], history['BBB'][0]['home']), ('L', '90-100', False))
 
     def test_unplayed_games_are_skipped(self):
-        self.assertEqual(team_histories([game('1', '2026-11-01', 'AAA', 'BBB', 0.6)], k=20), {})
+        self.assertEqual(team_histories([game('1', '2026-11-01', 'AAA', 'BBB', 0.6)], 20), {})
 
     def test_rankings_order_record_and_teams_without_games(self):
         history = team_histories([game('1', '2026-11-01', 'AAA', 'BBB', 0.5, 100, 90),
-                                  game('2', '2026-11-02', 'BBB', 'AAA', 0.5, 80, 95)], k=20)
+                                  game('2', '2026-11-02', 'BBB', 'AAA', 0.5, 80, 95)], 20)
         rows = power_rankings(history, {'AAA': 1500.0, 'BBB': 1500.0, 'CCC': 1510.0})
         self.assertEqual([r['team'] for r in rows], ['AAA', 'CCC', 'BBB'])
         self.assertEqual((rows[0]['wins'], rows[0]['losses'], rows[0]['last10'], rows[0]['rank']), (2, 0, '2-0', 1))
@@ -39,3 +39,31 @@ class InsightTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ModelChangeTests(unittest.TestCase):
+    def test_margin_of_victory_history_matches_backtest(self):
+        from evaluate_elo import PARAMETERS, backtest
+        raw = [dict(game_id='1', season='x', game_date='2026-11-01', home_team_id=1, home_team='AAA', away_team_id=2,
+                    away_team='BBB', home_score=130, away_score=100, neutral_site=0),
+               dict(game_id='2', season='x', game_date='2026-11-02', home_team_id=2, home_team='BBB', away_team_id=1,
+                    away_team='AAA', home_score=101, away_score=99, neutral_site=0)]
+        ratings = {}
+        rows = backtest(raw, PARAMETERS, ratings)
+        games = [dict(game_id=r['game_id'], date=r['game_date'], home_team=r['home_team'], away_team=r['away_team'],
+                      home_rating=r['home_rating'], away_rating=r['away_rating'],
+                      home_win_probability=r['home_win_probability'], home_score=r['home_score'],
+                      away_score=r['away_score']) for r in rows]
+        history = team_histories(games, PARAMETERS)
+        self.assertAlmostEqual(history['AAA'][-1]['rating'], ratings[1], places=1)
+        self.assertAlmostEqual(history['AAA'][1]['rating_before'], history['AAA'][0]['rating'], places=1)
+
+    def test_games_forecast_before_switch_use_old_model(self):
+        from evaluate_elo import ORIGINAL_PARAMETERS, PARAMETERS
+        g = game('1', '2026-11-01', 'AAA', 'BBB', 0.6, 130, 100)
+        old = team_histories([dict(g, predicted_at_utc='2026-11-01T15:00:00+00:00')], PARAMETERS,
+                             earlier=ORIGINAL_PARAMETERS, since='2026-11-26T22:00:00+00:00')
+        self.assertEqual(old['AAA'][0]['rating'], round(1500 + 20 * 0.4, 1))
+        new = team_histories([dict(g, predicted_at_utc='2026-11-27T15:00:00+00:00')], PARAMETERS,
+                             earlier=ORIGINAL_PARAMETERS, since='2026-11-26T22:00:00+00:00')
+        self.assertGreater(new['AAA'][0]['rating'], old['AAA'][0]['rating'])  # 30-point win counts more

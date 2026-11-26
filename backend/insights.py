@@ -2,27 +2,49 @@
 
 Everything here reads forecasts that were already made (the archive backtest and the
 live ledger); nothing is re-estimated. A team's rating after a game is its pregame
-rating plus the Elo update: K * (result - forecast win chance).
+rating plus the Elo update: K * (result - forecast win chance), scaled by the margin
+of victory when the model that made the forecast used it.
 """
 from collections import defaultdict
+import math
+
+from evaluate_elo import margin_multiplier
 
 
-def team_histories(games, k):
-    """{team: [point, ...]} in date order. Unplayed games are left out."""
+def rating_change(game, parameters):
+    """Points the home team gained (negative: lost) from one finished game."""
+    p = min(max(game["home_win_probability"], 1e-9), 1 - 1e-9)
+    actual = int(game["home_score"] > game["away_score"])
+    delta = parameters["k"] * (actual - p)
+    if parameters.get("margin_of_victory"):
+        edge = 400 * math.log10(p / (1 - p))  # the forecast's pregame edge, home court and rest included
+        delta *= margin_multiplier(game["home_score"] - game["away_score"], edge if actual else -edge)
+    return delta
+
+
+def team_histories(games, parameters, earlier=None, since=None):
+    """{team: [point, ...]} in date order. Unplayed games are left out.
+
+    parameters may be a number (K, original model). When the model changed mid-season,
+    games forecast before `since` (a UTC timestamp) use the `earlier` parameters.
+    """
+    as_dict = lambda value: dict(k=value) if isinstance(value, (int, float)) else value
+    parameters, earlier = as_dict(parameters), as_dict(earlier)
     history = defaultdict(list)
     for g in sorted(games, key=lambda g: (g["date"], g["game_id"])):
         if g.get("home_score") is None:
             continue
         home_won = g["home_score"] > g["away_score"]
-        for team, opponent, rating, chance, won, home, scored, allowed in (
+        change = rating_change(g, earlier if earlier and since and g.get("predicted_at_utc", since) < since else parameters)
+        for team, opponent, rating, chance, won, home, scored, allowed, gained in (
                 (g["home_team"], g["away_team"], g["home_rating"], g["home_win_probability"], home_won, True,
-                 g["home_score"], g["away_score"]),
+                 g["home_score"], g["away_score"], change),
                 (g["away_team"], g["home_team"], g["away_rating"], 1 - g["home_win_probability"], not home_won, False,
-                 g["away_score"], g["home_score"])):
+                 g["away_score"], g["home_score"], -change)):
             history[team].append(dict(date=g["date"], game_id=g["game_id"], opponent=opponent, home=home,
                                       result="W" if won else "L", score=f"{scored}-{allowed}",
                                       win_chance=round(chance, 4), rating_before=round(rating, 1),
-                                      rating=round(rating + k * (int(won) - chance), 1)))
+                                      rating=round(rating + gained, 1)))
     return dict(history)
 
 

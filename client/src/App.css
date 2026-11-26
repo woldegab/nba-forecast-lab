@@ -298,6 +298,7 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .day-nav .round { width: 36px; height: 36px; font-size: 20px; }
 .day-nav-date { margin-top: 0; min-width: 15ch; text-align: center; }
 .day-nav .text-link { margin-left: 6px; font-size: 15px; }
+.model-change { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
 .past-note { margin: -6px 0 16px; max-width: 70ch; }
 
 /* ---------- loading placeholders ---------- */

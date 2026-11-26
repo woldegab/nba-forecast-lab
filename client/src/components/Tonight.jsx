@@ -22,7 +22,7 @@ function byDate(games) {
   return groups;
 }
 
-function RecordCard({ summary }) {
+function RecordCard({ summary, change }) {
   const live = summary.live;
   if (!live.games) return <aside className="record-card"><p className="muted">The live record starts once the first forecasted games finish.</p></aside>;
   const wins = Math.round(live.accuracy * live.games);
@@ -35,6 +35,7 @@ function RecordCard({ summary }) {
       <div><dt>Always pick home team</dt><dd>{homeWins}–{live.games - homeWins}</dd></div>
       <div><dt>Brier score</dt><dd>{live.brier.toFixed(3)}</dd></div>
     </dl>
+    {change && <p className="muted small model-change">Model updated {shortDate(new Date(change.since).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }))}: newer forecasts also count margin of victory and back-to-backs. Earlier forecasts are unchanged.</p>}
   </aside>;
 }
 
@@ -153,7 +154,7 @@ export default function Tonight({ onArchive }) {
         <DayNav shown={shown} previous={previous} next={next} isToday={!day} onPick={pick} />
         <p className="intro-note">Each forecast is saved before tip-off and never changed, so the record can't be adjusted after the fact.</p>
       </div>
-      <RecordCard summary={summary} />
+      <RecordCard summary={summary} change={state.data.model_change} />
     </section>
 
     {day ? <PastDay key={day} date={day} /> : <>

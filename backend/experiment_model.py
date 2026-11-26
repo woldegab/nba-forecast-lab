@@ -27,7 +27,7 @@ from pathlib import Path
 import random
 import sqlite3
 
-from evaluate_elo import PARAMETERS, SEASONS, audit, backtest, metrics, played_yesterday
+from evaluate_elo import ORIGINAL_PARAMETERS, SEASONS, audit, backtest, metrics, played_yesterday
 from import_games import DEFAULT_DB
 
 PENALTIES = (0, 10, 20, 30, 40, 50)
@@ -55,7 +55,7 @@ def score(games, season, parameters):
 
 
 def variant(margin_of_victory=False, back_to_back=0):
-    return dict(PARAMETERS, margin_of_victory=margin_of_victory, back_to_back=float(back_to_back))
+    return dict(ORIGINAL_PARAMETERS, margin_of_victory=margin_of_victory, back_to_back=float(back_to_back))
 
 
 def bootstrap_difference(current, chosen, outcomes, resamples=RESAMPLES, seed=SEED):

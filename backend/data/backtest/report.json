@@ -1,11 +1,102 @@
 {
-  "generated_at": "2026-11-26T20:21:28.085674+00:00",
+  "experiment": {
+    "development": {
+      "current": {
+        "accuracy": 0.6528455284552845,
+        "brier": 0.2143552056593289,
+        "log_loss": 0.6165002185276323,
+        "games": 1230
+      },
+      "margin_of_victory": {
+        "accuracy": 0.6682926829268293,
+        "brier": 0.21179580642788476,
+        "log_loss": 0.6108717313136117,
+        "games": 1230
+      },
+      "back_to_back": {
+        "0": {
+          "accuracy": 0.6528455284552845,
+          "brier": 0.2143552056593289,
+          "log_loss": 0.6165002185276323,
+          "games": 1230
+        },
+        "10": {
+          "accuracy": 0.6504065040650406,
+          "brier": 0.21385309824904042,
+          "log_loss": 0.6152984279998108,
+          "games": 1230
+        },
+        "20": {
+          "accuracy": 0.6536585365853659,
+          "brier": 0.21342844978301057,
+          "log_loss": 0.6142759733629263,
+          "games": 1230
+        },
+        "30": {
+          "accuracy": 0.6601626016260163,
+          "brier": 0.2130817145779217,
+          "log_loss": 0.6134327091889983,
+          "games": 1230
+        },
+        "40": {
+          "accuracy": 0.6609756097560976,
+          "brier": 0.21281300416083906,
+          "log_loss": 0.6127682585838978,
+          "games": 1230
+        },
+        "50": {
+          "accuracy": 0.6593495934959349,
+          "brier": 0.21262208905196375,
+          "log_loss": 0.6122820155104821,
+          "games": 1230
+        }
+      }
+    },
+    "chosen": "margin of victory + back-to-back 50",
+    "chosen_parameters": {
+      "initial_rating": 1500.0,
+      "k": 20.0,
+      "home_advantage": 65.0,
+      "retention": 0.75,
+      "margin_of_victory": true,
+      "back_to_back": 50.0
+    },
+    "rest_facts": {
+      "back_to_back_appearances": 450,
+      "back_to_back_win_rate": 0.44666666666666666,
+      "one_team_tired_games": 308,
+      "rested_team_win_rate": 0.577922077922078
+    },
+    "adopt": true,
+    "held_out": {
+      "current": {
+        "accuracy": 0.6772357723577236,
+        "brier": 0.2097129840746686,
+        "log_loss": 0.6081283474893375,
+        "games": 1230
+      },
+      "chosen": {
+        "accuracy": 0.6853658536585366,
+        "brier": 0.2055744064809186,
+        "log_loss": 0.5982394938842767,
+        "games": 1230
+      },
+      "brier_difference": -0.004138577593749864,
+      "interval": [
+        -0.006896205779386742,
+        -0.00157075105042811
+      ]
+    }
+  },
+  "generated_at": "2026-11-26T22:12:15.297867+00:00",
   "data_sha256": "a554a193a5ac2884274e230558eb28b0ad6bc140da9d469b4d4c840faaf2b7b0",
   "parameters": {
     "initial_rating": 1500.0,
     "k": 20.0,
     "home_advantage": 65.0,
-    "retention": 0.75
+    "retention": 0.75,
+    "margin_of_victory": true,
+    "back_to_back": 50.0
   },
   "warmup_season": "2023-24",
   "development_season": "2024-25",
@@ -41,9 +132,9 @@
     "2024-25": {
       "games": 1230,
       "elo": {
-        "accuracy": 0.6528455284552845,
-        "brier": 0.2143552056593289,
-        "log_loss": 0.6165002185276323
+        "accuracy": 0.6723577235772358,
+        "brier": 0.2100115536504333,
+        "log_loss": 0.6065485577960656
       },
       "home_rate_baseline": {
         "accuracy": 0.5439024390243903,
@@ -56,9 +147,9 @@
     "2025-26": {
       "games": 1230,
       "elo": {
-        "accuracy": 0.6772357723577236,
-        "brier": 0.2097129840746686,
-        "log_loss": 0.6081283474893375
+        "accuracy": 0.6853658536585366,
+        "brier": 0.2055744064809186,
+        "log_loss": 0.5982394938842767
       },
       "home_rate_baseline": {
         "accuracy": 0.5544715447154471,
@@ -69,11 +160,11 @@
       "coin_flip_brier": 0.25
     }
   },
-  "protocol": "Fixed parameters; predict before updating; updates after each date; ratings carry forward with offseason regression. No parameter tuning on either evaluation season.",
+  "protocol": "Predict before updating; updates after each date; ratings carry forward with offseason regression. K, home advantage and retention were fixed in advance; margin of victory and the back-to-back penalty were chosen on 2024-25 only and scored once on 2025-26 (see MODEL_EXPERIMENT_RESULTS.md).",
   "limitations": [
     "Historical backtest using current corrected records, not archived pregame snapshots.",
     "Ratings update after prior test games; this evaluates daily sequential forecasting, not preseason forecasts.",
-    "No injuries, rosters, player projections, rest, margin-of-victory or playoff updates.",
+    "No injuries, rosters, player projections, travel or playoff updates. Rest covers back-to-backs only.",
     "Neutral-site registry is manually maintained; home-court advantage is zero for listed games.",
     "2025-26 has now been evaluated; repeated development against it would make it development data."
   ]
