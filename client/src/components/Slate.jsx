@@ -21,10 +21,10 @@ export function MatchupTile({ game }) {
   return <article className="tile" aria-label={`${away.fullName} at ${home.fullName}`}>
     <div className="tile-art" style={{ '--away': away.color, '--home': home.color }} role="img"
       aria-label={`Win chance: ${away.name} ${whole(game.away_win_probability)}, ${home.name} ${whole(game.home_win_probability)}`}>
-      <span className="tile-time">{tipoff(game.tipoff_utc)} ET</span>
       {side(game.away_team, game.away_win_probability, !even && !homeFavored)}
       {side(game.home_team, game.home_win_probability, !even && homeFavored)}
     </div>
+    <p className="tile-time">{tipoff(game.tipoff_utc)} ET</p>
     <h3>{away.name} at {home.name}{game.neutral_site ? ' (neutral site)' : ''}</h3>
     <p className="tile-pick">{even ? 'Toss-up' : `${pick.name} favored, ${whole(pickChance)}`}</p>
     <Preview preview={game.preview} compact />

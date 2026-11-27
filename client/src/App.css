@@ -483,8 +483,8 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .tile-side .logo img { width: 44px; height: 44px; }
 .tile-pct { font-size: 40px; font-weight: 500; letter-spacing: -.03em; color: var(--text-2); }
 .tile-side.favorite .tile-pct { color: var(--text); font-weight: 800; }
-.tile-time { position: absolute; top: 12px; left: 12px; background: var(--raised); border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 600; box-shadow: 0 1px 4px var(--shadow); }
-.tile h3 { font-size: 17px; font-weight: 700; margin-top: 14px; }
+.tile-time { margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--text-2); }
+.tile h3 { font-size: 17px; font-weight: 700; margin-top: 2px; }
 .tile-pick { font-size: 15px; }
 .tile .preview { margin-top: 6px; }
 .tile .preview, .result .preview { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
@@ -521,7 +521,12 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 
 @media (max-width: 760px) {
   .tiles { grid-template-columns: 1fr; gap: 40px; margin-top: 28px; }
-  .tile-art { aspect-ratio: 16 / 10; }
+  .tile-art { aspect-ratio: 2 / 1; }
+  .tile-side { padding: 0 20px; }
+  .tile-side .logo { width: 48px; height: 48px; }
+  .tile-side .logo img { width: 36px; height: 36px; }
+  .tile-pct { font-size: 32px; }
+  .tile-time { margin-top: 12px; }
   .record-strip { gap: 14px 28px; }
   .record-strip div { flex: 1 1 40%; }
   .record-strip dd { font-size: 22px; }

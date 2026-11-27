@@ -28,7 +28,7 @@ function RecordStrip({ summary, change, saved }) {
   const homeWins = Math.round(live.home_win_rate * live.games);
   return <section aria-label="Live record">
     <dl className="record-strip">
-      <div><dt>Record since {shortDate(summary.first_live_date)}</dt><dd>{wins}–{live.games - wins}</dd></div>
+      <div><dt>Record since {new Date(`${summary.first_live_date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</dt><dd>{wins}–{live.games - wins}</dd></div>
       <div><dt>Correct picks</dt><dd>{pct(live.accuracy)}</dd></div>
       <div><dt>Always picking home</dt><dd>{homeWins}–{live.games - homeWins}</dd></div>
       <div><dt>Brier score</dt><dd>{live.brier.toFixed(3)}</dd></div>
