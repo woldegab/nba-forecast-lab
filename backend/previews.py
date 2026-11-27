@@ -76,7 +76,7 @@ PROMPTS = {
         "Write streaks in words (\"has won 6 straight\", \"has lost 2 in a row\"); never write codes\n"
         "like W6 or L2 from the facts.\n\nExample:"),
 }
-ACTIVE_PROMPT = "v3"
+ACTIVE_PROMPT = "v4"
 
 SCHEMA = {
     "type": "OBJECT",
