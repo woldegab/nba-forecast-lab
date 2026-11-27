@@ -44,8 +44,10 @@ function FeaturedGame({ game }) {
   const away = teamInfo(game.away_team);
   const home = teamInfo(game.home_team);
   const even = isEven(game);
-  return <article className="featured" style={{ '--away': away.color, '--home': home.color }} aria-label={`Closest game today: ${away.fullName} at ${home.fullName}`}>
-    <p className="featured-label">Closest game today, {tipoff(game.tipoff_utc)} ET</p>
+  // "Closest" only when it really is close; on lopsided slates it's just the featured game.
+  const label = Math.max(game.home_win_probability, game.away_win_probability) <= 0.6 ? 'Closest game today' : 'Featured game';
+  return <article className="featured" style={{ '--away': away.color, '--home': home.color }} aria-label={`${label}: ${away.fullName} at ${home.fullName}`}>
+    <p className="featured-label">{label}, {tipoff(game.tipoff_utc)} ET</p>
     <div className="featured-teams">
       <div className={`featured-side${!even && game.away_win_probability > 0.5 ? ' favorite' : ''}`} style={{ '--team': away.color }}>
         <Logo abbreviation={game.away_team} />

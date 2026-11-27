@@ -28,8 +28,14 @@ function TeamLine({ abbreviation, probability, score, favorite, winner, reveal, 
 export { Logo };
 
 // A short plain-English preview saved with the forecast (backend/previews.py).
-export function Preview({ preview }) {
+export function Preview({ preview, compact = false }) {
   if (!preview) return null;
+  if (compact) {
+    return <>
+      <p className="preview" title={preview.text}>{preview.text}</p>
+      {preview.source === 'ai' && <p className="ai-mark" title="Written by an AI model from this site's numbers, then checked automatically: every number must match, and no injury or betting talk.">AI-written, fact-checked</p>}
+    </>;
+  }
   return <p className="preview">{preview.text}
     {preview.source === 'ai' && <span className="preview-tag" title="Written by an AI model from this site's numbers, then checked automatically: every number must match, and no injury or betting talk.">AI-written, fact-checked</span>}
   </p>;
@@ -80,8 +86,8 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
       <span style={{ flexGrow: grown ? game.away_win_probability : 0.5, background: away.color }} />
       <span style={{ flexGrow: grown ? game.home_win_probability : 0.5, background: home.color }} />
     </div>
-    {!final && <Preview preview={game.preview} />}
-    {final && showResults && <Preview preview={game.recap} />}
+    {!final && <Preview preview={game.preview} compact />}
+    {final && showResults && <Preview preview={game.recap} compact />}
     <div className="game-actions">
       <details>
         <summary>Why this forecast</summary>
