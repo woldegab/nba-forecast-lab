@@ -5,7 +5,7 @@ name: Daily forecasts
 
 on:
   schedule:
-    - cron: "0 15 * * *"   # 15:00 UTC = 9 a.m. Central (10 a.m. during daylight time)
+    - cron: "0 12 * * *"   # 15:00 UTC = 9 a.m. Central (10 a.m. during daylight time)
   workflow_dispatch:        # run it by hand from the Actions tab
 
 permissions:
