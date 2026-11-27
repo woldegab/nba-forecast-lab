@@ -102,12 +102,21 @@ function DayNav({ shown, previous, next, isToday, onPick }) {
   </div>;
 }
 
-function EmptyDay({ next }) {
+function EmptyDay({ next, today }) {
+  const count = next && `${next.games} game${next.games === 1 ? '' : 's'}`;
+  // Before the morning job runs, today's games aren't forecast yet; say so instead of "no games".
+  if (next && next.date === today) {
+    return <section className="empty-day">
+      <Court />
+      <h2>Today's forecasts are on the way</h2>
+      <p className="muted">There are {count} today. Forecasts post at about 9 a.m. Central, before any tip-off.</p>
+    </section>;
+  }
   return <section className="empty-day">
     <Court />
     <h2>No games today</h2>
     <p className="muted">{next
-      ? <>Next up: {longDate(next.date)}, {next.games} game{next.games === 1 ? '' : 's'}. Forecasts post that morning.</>
+      ? <>Next up: {longDate(next.date)}, {count}. Forecasts post that morning.</>
       : <>Forecasts post each morning on game days.</>}</p>
   </section>;
 }
@@ -159,7 +168,7 @@ export default function Tonight({ onArchive }) {
     </section>
 
     {day ? <PastDay key={day} date={day} /> : <>
-    {upcoming.length === 0 && <EmptyDay next={summary.next_games} />}
+    {upcoming.length === 0 && <EmptyDay next={summary.next_games} today={todayDate} />}
     {featured && <FeaturedGame game={featured} />}
     {others.length > 0 && <div className="card-grid">{others.map((game) => <GameCard key={game.game_id} game={game} animate />)}</div>}
 
