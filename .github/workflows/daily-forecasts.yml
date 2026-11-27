@@ -5,7 +5,8 @@ name: Daily forecasts
 
 on:
   schedule:
-    - cron: "0 12 * * *"   # 15:00 UTC = 9 a.m. Central (10 a.m. during daylight time)
+    - cron: "17 11 * * *"   # 5:17 a.m. Central
+    - cron: "47 13 * * *"   # 7:47 a.m. Central backup, in case GitHub skips the first
   workflow_dispatch:        # run it by hand from the Actions tab
 
 permissions:
