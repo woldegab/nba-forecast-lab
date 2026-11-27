@@ -15,21 +15,11 @@ const dateLabel = (date, options = { weekday: 'long', month: 'long', day: 'numer
 const record = (accuracy, games) => { const wins = Math.round(accuracy * games); return `${wins.toLocaleString()}–${(games - wins).toLocaleString()}`; };
 const views = [['tonight', 'Today'], ['teams', 'Teams'], ['archive', 'Past seasons'], ['players', 'Players'], ['model', 'How it works']];
 
-function currentTheme() {
-  const chosen = document.documentElement.dataset.theme;
-  if (chosen) return chosen;
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
+// Light by default; dark only when the visitor picks it with the header button (the pick is remembered).
+const currentTheme = () => (document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light');
 
-// Follows the device setting until the visitor picks one; the pick is remembered.
 function ThemeToggle() {
   const [theme, setTheme] = useState(currentTheme);
-  useEffect(() => {
-    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
-    const follow = () => { if (!document.documentElement.dataset.theme) setTheme(currentTheme()); };
-    media?.addEventListener('change', follow);
-    return () => media?.removeEventListener('change', follow);
-  }, []);
   useEffect(() => {
     document.body.classList.toggle('dark-ui', theme === 'dark');
     document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => { meta.content = theme === 'dark' ? '#17181b' : '#ffffff'; });

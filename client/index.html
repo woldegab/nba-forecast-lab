@@ -14,10 +14,9 @@
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#17181b" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" />
     <script>
-      // Apply a saved light/dark choice before the page draws, so it never flashes the wrong colors.
+      // Light unless the visitor picked dark before; applied before the page draws so it never flashes.
       try { const t = localStorage.getItem('theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
     </script>
   </head>

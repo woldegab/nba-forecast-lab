@@ -19,7 +19,7 @@
   --hit-bg: #e7f4ec;
   --miss-bg: #fbeceb;
   --shadow: rgba(0, 0, 0, .08);
-  color-scheme: light dark;
+  color-scheme: light;
   font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   font-size: 16px;
   line-height: 1.5;
@@ -418,17 +418,7 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .legend.archive::before { border-color: var(--text); }
 .legend.live::before { border-color: var(--brand); }
 
-/* ---------- dark mode, following the device setting ---------- */
-/* Dark colors: used when the device is in dark mode, unless the visitor picked light,
-   or whenever the visitor picked dark with the header button. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --text: #f2f2f2; --text-2: #a3a3a8; --line: #2a2b30; --line-strong: #3a3b41; --surface: #222327; --bg: #17181b;
-    --brand: #f2f2f2; --hit: #4cc38a; --miss: #ff6b5e;
-    --on-text: #17181b; --raised: #2c2d32; --tint: #17181b; --photo: #222327; --off: #5c5d63;
-    --hit-bg: #15362a; --miss-bg: #3d1f1c; --shadow: rgba(0, 0, 0, .4);
-  }
-}
+/* ---------- dark mode, only when picked with the header button ---------- */
 :root[data-theme='dark'] {
     --text: #f2f2f2; --text-2: #a3a3a8; --line: #2a2b30; --line-strong: #3a3b41; --surface: #222327; --bg: #17181b;
     --brand: #f2f2f2; --hit: #4cc38a; --miss: #ff6b5e;
