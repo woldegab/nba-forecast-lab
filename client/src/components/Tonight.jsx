@@ -19,9 +19,11 @@ function byDate(games) {
 }
 
 // The live record as a row of numbers under the headline.
-function RecordStrip({ summary, change }) {
+function RecordStrip({ summary, change, saved }) {
   const live = summary.live;
-  if (!live.games) return <p className="muted record-strip-empty">The live record starts once the first forecasted games finish.</p>;
+  if (!live.games) return <p className="muted record-strip-empty">{saved
+    ? `The live record starts tonight: ${saved} forecast${saved === 1 ? '' : 's'} saved before tip-off and never changed.`
+    : 'The live record starts once the first forecasted games finish.'}</p>;
   const wins = Math.round(live.accuracy * live.games);
   const homeWins = Math.round(live.home_win_rate * live.games);
   return <section aria-label="Live record">
@@ -128,7 +130,7 @@ export default function Tonight({ onArchive }) {
     <section className="today-head">
       <h1>{day ? 'Earlier this season' : upcoming.length ? `${upcoming.length} game${upcoming.length === 1 ? '' : 's'} tonight` : 'Today'}</h1>
       <DayNav shown={shown} previous={previous} next={next} isToday={!day} onPick={pick} />
-      <RecordStrip summary={summary} change={state.data.model_change} />
+      <RecordStrip summary={summary} change={state.data.model_change} saved={day ? 0 : upcoming.length} />
     </section>
 
     {day ? <PastDay key={day} date={day} /> : <>

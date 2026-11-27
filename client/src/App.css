@@ -408,14 +408,14 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .calibration-section p { color: var(--text-2); max-width: 52ch; margin-top: 8px; }
 .calibration-section h2 { font-size: 24px; font-weight: 700; letter-spacing: -.02em; }
 .series path { fill: none; stroke-width: 2; }
-.series.archive path, .series.archive circle { stroke: var(--off); }
-.series.archive circle { fill: var(--off); }
+.series.archive path, .series.archive circle { stroke: var(--text); }
+.series.archive circle { fill: var(--text); }
 .series.live path, .series.live circle { stroke: var(--brand); }
 .series.live circle { fill: var(--brand); }
 .calibration figcaption { display: flex; gap: 8px 20px; flex-wrap: wrap; font-size: 13px; color: var(--text-2); margin-top: 8px; }
 .legend::before { content: ''; display: inline-block; width: 14px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
 .legend.perfect-key::before { border-top: 2px dashed var(--off); }
-.legend.archive::before { border-color: var(--off); }
+.legend.archive::before { border-color: var(--text); }
 .legend.live::before { border-color: var(--brand); }
 
 /* ---------- dark mode, following the device setting ---------- */
@@ -538,3 +538,21 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
   .result { grid-template-columns: 1fr; row-gap: 10px; }
   .result-status { flex-direction: row; gap: 10px; padding-top: 0; }
 }
+
+/* ---------- consistency pass: lists instead of boxes ---------- */
+/* keep the focus ring inside the scrolling nav so it isn't clipped */
+.nav button:focus-visible { outline-offset: -2px; }
+/* when the live season is on the chart, past seasons step back to gray */
+.calibration:has(.series.live) .series.archive path, .calibration:has(.series.live) .series.archive circle { stroke: var(--off); }
+.calibration:has(.series.live) .series.archive circle { fill: var(--off); }
+.calibration:has(.series.live) .legend.archive::before { border-color: var(--off); }
+
+.team-list { gap: 0; border-top: 1px solid var(--line); }
+.team-row { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 16px 8px; }
+.team-row:hover { border-color: var(--line); box-shadow: none; background: var(--surface); transform: none; }
+.team-row .logo { background: none; }
+
+.stat-card { border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 20px 0 0; }
+
+.result-actions { display: flex; gap: 8px 24px; flex-wrap: wrap; align-items: baseline; }
+.result-actions .text-link { font-size: 14px; margin-top: 8px; }

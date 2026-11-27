@@ -36,10 +36,12 @@ export function MatchupTile({ game }) {
 }
 
 // A finished (or not yet played) game as one row of a results list.
-export function ResultRow({ game }) {
+// With showResults off (past seasons), scores and outcomes stay hidden so you can guess first.
+export function ResultRow({ game, showResults = true, onExplore }) {
   const away = teamInfo(game.away_team);
   const home = teamInfo(game.home_team);
-  const final = game.home_score != null;
+  const played = game.home_score != null;
+  const final = played && showResults;
   const line = (abbreviation, team, chance, score, isHome) => {
     const won = final && game.actual_winner === abbreviation;
     return <div className={`result-line${won ? ' won' : ''}${final && !won ? ' lost' : ''}`}>
@@ -51,17 +53,20 @@ export function ResultRow({ game }) {
   };
   return <li className="result" aria-label={`${away.fullName} at ${home.fullName}`}>
     <div className="result-status">
-      {final ? 'Final' : `${tipoff(game.tipoff_utc)} ET`}
+      {final ? 'Final' : played ? 'Result hidden' : `${tipoff(game.tipoff_utc)} ET`}
       {final && game.correct !== null && <span className={game.correct ? 'hit' : 'miss'}>{game.correct ? 'Called it' : 'Missed'}</span>}
     </div>
     <div className="result-body">
       {line(game.away_team, away, game.away_win_probability, game.away_score, false)}
       {line(game.home_team, home, game.home_win_probability, game.home_score, true)}
       {final && <Preview preview={game.recap} compact />}
-      <details className="why">
-        <summary>Why this forecast</summary>
-        <WhyThisForecast game={game} />
-      </details>
+      <div className="result-actions">
+        <details className="why">
+          <summary>Why this forecast</summary>
+          <WhyThisForecast game={game} />
+        </details>
+        {onExplore && <button className="text-link" onClick={onExplore}>Player matchups</button>}
+      </div>
     </div>
   </li>;
 }

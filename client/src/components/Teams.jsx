@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import GameCard from './GameCard';
+import { MatchupTile } from './Slate';
 import { RatingChart, Sparkline } from './Charts';
 import { ListSkeletons, Loading } from './Skeleton';
 import { getData } from '../services/nbaApi';
@@ -60,7 +60,7 @@ function TeamPage({ team, season, onSeason, onBack }) {
     </section>
     {data.upcoming.length > 0 && <section className="section">
       <h2>Next up</h2>
-      <div className="card-grid">{data.upcoming.map((game) => <GameCard key={game.game_id} game={game} />)}</div>
+      <div className="tiles">{data.upcoming.map((game) => <MatchupTile key={game.game_id} game={game} />)}</div>
     </section>}
     {recent.length > 0 && <section className="panel">
       <h2>Last {recent.length} games</h2>

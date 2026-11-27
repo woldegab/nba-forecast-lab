@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import GameCard from './components/GameCard';
+import { ResultRow } from './components/Slate';
 import Players from './components/Players';
 import Matchup from './components/Matchup';
 import Tonight from './components/Tonight';
@@ -99,7 +99,7 @@ function Slate({ date, controls }) {
     <h2 className="day-heading">{dateLabel(date)}{showResults && state.games.length > 0 && <span className="muted"> {hits} of {state.games.length} correct</span>}</h2>
     {!state.games.length ? <p className="empty">No games on this date. Use the arrows to find the next game day.</p>
       : !visible.length ? <p className="empty">No games match. <button className="text-link" onClick={() => { setQuery(''); setFilter('all'); }}>Clear filters</button></p>
-      : <div className="card-grid">{visible.map((game) => <GameCard key={game.game_id} game={game} showResults={showResults} onExplore={() => setMatchup(game)} />)}</div>}
+      : <ul className="results">{visible.map((game) => <ResultRow key={game.game_id} game={game} showResults={showResults} onExplore={() => setMatchup(game)} />)}</ul>}
   </section>;
 }
 
