@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import teamLogos from '../utils/teamLogos';
 import { teamInfo } from '../utils/teams';
 import { isEven } from '../utils/forecast';
@@ -28,11 +28,30 @@ function TeamLine({ abbreviation, probability, score, favorite, winner, reveal, 
 export { Logo };
 
 // A short plain-English preview saved with the forecast (backend/previews.py).
+// On small cards the text is capped at 3 lines; "More" appears only when something is cut off.
+function CompactText({ text }) {
+  const ref = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [cut, setCut] = useState(false);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || open) return undefined;
+    const measure = () => setCut(el.scrollHeight > el.clientHeight + 1);
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [text, open]);
+  return <>
+    <p ref={ref} className={`preview${open ? ' open' : ''}`}>{text}</p>
+    {(cut || open) && <button className="more-toggle" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? 'Less' : 'More'}</button>}
+  </>;
+}
+
 export function Preview({ preview, compact = false }) {
   if (!preview) return null;
   if (compact) {
     return <>
-      <p className="preview" title={preview.text}>{preview.text}</p>
+      <CompactText text={preview.text} />
       {preview.source === 'ai' && <p className="ai-mark" title="Written by an AI model from this site's numbers, then checked automatically: every number must match, and no injury or betting talk.">AI-written, fact-checked</p>}
     </>;
   }

@@ -304,6 +304,8 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 /* ---------- AI previews ---------- */
 /* Keep card heights even: up to 3 lines on small cards; the full text is in the tooltip and read by screen readers. */
 .game-card .preview { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.game-card .preview.open { display: block; -webkit-line-clamp: unset; line-clamp: none; overflow: visible; }
+.more-toggle { align-self: flex-start; background: none; border: 0; padding: 0; margin-top: -8px; font-size: 14px; font-weight: 600; color: var(--text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .game-card .preview .preview-tag { display: none; }
 .game-card .ai-mark::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); margin-right: 6px; vertical-align: middle; }
 .game-card .ai-mark { font-size: 12px; color: var(--text-2); margin-top: -6px; }
