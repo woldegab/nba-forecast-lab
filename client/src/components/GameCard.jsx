@@ -81,6 +81,7 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
       <span style={{ flexGrow: grown ? game.home_win_probability : 0.5, background: home.color }} />
     </div>
     {!final && <Preview preview={game.preview} />}
+    {final && showResults && <Preview preview={game.recap} />}
     <div className="game-actions">
       <details>
         <summary>Why this forecast</summary>

@@ -140,6 +140,17 @@ class LiveAndStaticTests(unittest.TestCase):
             self.assertEqual(game['preview']['source'], 'ai')
             self.assertIsNone(client.get('/api/live/day?date=2026-11-25').json()['games'][0]['preview'])
 
+    def test_recaps_and_ai_quality(self):
+        (self.live / 'recaps_2026-27.json').write_text(json.dumps({'1': dict(recap='BBB beat AAA 100-99.', source='ai')}))
+        eval_dir = self.path / 'eval'
+        eval_dir.mkdir()
+        (eval_dir / 'history.json').write_text(json.dumps([dict(date='2026-11-30', previews=dict(passed=18, answered=20))]))
+        with TestClient(create_app(self.path / 'missing', self.live, self.static, eval_dir)) as client:
+            self.assertEqual(client.get('/api/live').json()['recent'][0]['recap']['source'], 'ai')
+            quality = client.get('/api/ai-quality').json()
+            self.assertEqual(quality['history'][0]['previews']['passed'], 18)
+            self.assertIsNone(quality['judge'])
+
     def test_missing_live_files_return_503(self):
         with self.client(self.path / 'nothing') as client:
             self.assertEqual(client.get('/api/live').status_code, 503)

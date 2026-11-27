@@ -67,6 +67,17 @@ Example: "The model gives the Celtics a 64% chance in New York. Boston has won 3
 Facts:
 """
 
+# Prompt versions are kept side by side so ai_eval.py compare can test them on the same games.
+# v4 adds one instruction: write streaks in words, never as the raw codes in the facts.
+PROMPTS = {
+    "v3": INSTRUCTIONS,
+    "v4": INSTRUCTIONS.replace(
+        "\nExample:",
+        "Write streaks in words (\"has won 6 straight\", \"has lost 2 in a row\"); never write codes\n"
+        "like W6 or L2 from the facts.\n\nExample:"),
+}
+ACTIVE_PROMPT = "v3"
+
 SCHEMA = {
     "type": "OBJECT",
     "properties": {"headline": {"type": "STRING"}, "preview": {"type": "STRING"}},
@@ -173,6 +184,8 @@ def check(preview, facts):
                 and underdog["win_chance"] != favorite["win_chance"]:
             problems.append("gives only the underdog's chance")
     problems += claim_problems(whole, facts)
+    if re.search(r"\b[WL]\d+\b", whole):
+        problems.append("jargon: raw streak code like W6 instead of words")
     match = BANNED.search(whole)
     if match:
         problems.append(f"off-limits topic: '{match.group(0)}'")
@@ -235,25 +248,31 @@ def template(facts):
 
 
 class GeminiClient:
-    """Gemini API (free tier works) with JSON output matching SCHEMA."""
+    """Gemini API (free tier works). ask() returns JSON matching a schema; write() is a preview."""
 
-    def __init__(self, key, model=None, timeout=30):
-        self.key, self.model, self.timeout = key, model or os.environ.get("GEMINI_MODEL", DEFAULT_MODEL), timeout
+    def __init__(self, key, model=None, prompt=None, timeout=30):
+        self.key, self.timeout = key, timeout
+        self.model = model or os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)
+        self.prompt_version = prompt or os.environ.get("GEMINI_PROMPT", ACTIVE_PROMPT)
+        if self.prompt_version not in PROMPTS:
+            raise ValueError(f"Unknown prompt version {self.prompt_version}; choose from {sorted(PROMPTS)}")
 
-    def write(self, facts):
+    def ask(self, text, schema, temperature=0.7, max_tokens=400):
         import httpx
         response = httpx.post(
             f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent",
             headers={"x-goog-api-key": self.key},
-            json=dict(contents=[dict(parts=[dict(text=INSTRUCTIONS + json.dumps(facts, indent=2))])],
-                      generationConfig=dict(responseMimeType="application/json", responseSchema=SCHEMA,
-                                            temperature=0.7, maxOutputTokens=400)),
+            json=dict(contents=[dict(parts=[dict(text=text)])],
+                      generationConfig=dict(responseMimeType="application/json", responseSchema=schema,
+                                            temperature=temperature, maxOutputTokens=max_tokens)),
             timeout=self.timeout)
         if response.status_code == 429:
             raise QuotaError("Gemini free-tier limit reached", retry_after(response))
         response.raise_for_status()
-        text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
-        data = json.loads(text)
+        return json.loads(response.json()["candidates"][0]["content"]["parts"][0]["text"])
+
+    def write(self, facts):
+        data = self.ask(PROMPTS[self.prompt_version] + json.dumps(facts, indent=2), SCHEMA)
         return dict(headline=str(data.get("headline", "")), preview=str(data.get("preview", "")))
 
 
@@ -280,18 +299,25 @@ class Paced:
     def __init__(self, client, pace=PACE_SECONDS, sleep=time.sleep):
         self.client, self.pace, self.sleep, self.last = client, pace, sleep, None
         self.model = client.model
+        self.prompt_version = getattr(client, "prompt_version", None)
 
-    def write(self, facts):
+    def _call(self, method, *args, **kwargs):
         for attempt in range(2):
             if attempt == 0 and self.last is not None and self.pace:
                 self.sleep(self.pace)
             self.last = True
             try:
-                return self.client.write(facts)
+                return getattr(self.client, method)(*args, **kwargs)
             except QuotaError as error:
                 if attempt or error.wait is None or error.wait > MAX_WAIT:
                     raise
                 self.sleep(error.wait + 1)
+
+    def write(self, facts):
+        return self._call("write", facts)
+
+    def ask(self, *args, **kwargs):
+        return self._call("ask", *args, **kwargs)
 
 
 def write_preview(facts, client, attempts=ATTEMPTS):
@@ -307,7 +333,7 @@ def write_preview(facts, client, attempts=ATTEMPTS):
             continue
         problems = check(draft, facts)
         if not problems:
-            return dict(draft, source="ai", model=client.model), []
+            return dict(draft, source="ai", model=client.model, prompt=getattr(client, "prompt_version", None)), []
     return dict(template(facts), source="template"), problems
 
 

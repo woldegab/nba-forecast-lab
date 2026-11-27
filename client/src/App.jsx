@@ -4,7 +4,7 @@ import Players from './components/Players';
 import Matchup from './components/Matchup';
 import Tonight from './components/Tonight';
 import Teams from './components/Teams';
-import { CalibrationChart } from './components/Charts';
+import { CalibrationChart, Sparkline } from './components/Charts';
 import { GameSkeletons, Loading } from './components/Skeleton';
 import { getData } from './services/nbaApi';
 import { teamInfo } from './utils/teams';
@@ -136,14 +136,37 @@ function Archive({ data }) {
   </>;
 }
 
+// How the AI-written previews and recaps are checked, measured weekly by backend/ai_eval.py.
+function AiQuality({ quality }) {
+  if (!quality?.history?.length) return null;
+  const wholePct = (value) => `${Math.round(value * 100)}%`;
+  const latest = quality.history.at(-1);
+  const rate = (part) => (part?.answered ? part.passed / part.answered : null);
+  const trend = quality.history.map((week) => rate(week.previews)).filter((v) => v !== null).map((v) => v * 100);
+  const judge = quality.judge;
+  return <section className="section narrow ai-quality">
+    <h2>How the AI-written text is checked</h2>
+    <p>Each game's preview and recap is written by an AI model using only this site's numbers, then checked by code before it's saved: every number must match, the favorite and winner can't be swapped, and there's no injury or betting talk. Anything that fails twice is replaced by a plain summary.</p>
+    <dl className="quality-stats">
+      <div><dt>Previews passing every check</dt><dd>{rate(latest.previews) === null ? '—' : wholePct(rate(latest.previews))}</dd></div>
+      <div><dt>Recaps passing every check</dt><dd>{rate(latest.recaps) === null ? '—' : wholePct(rate(latest.recaps))}</dd></div>
+      {latest.previews?.judged > 0 && <div><dt>Previews rated good by the AI judge</dt><dd>{wholePct(latest.previews.judge_good / latest.previews.judged)}</dd></div>}
+    </dl>
+    {trend.length > 1 && <div className="quality-trend"><Sparkline values={trend} color="var(--brand)" /><span className="muted small">Preview pass rate, weekly since {new Date(`${quality.history[0].date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span></div>}
+    <p className="muted small">Measured {new Date(`${latest.date}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} on {latest.previews?.answered ?? 0} recent games with {latest.model}.{judge?.n ? ` The AI judge agreed with hand grading on ${wholePct(judge.agreement)} of ${judge.n} previews.` : ''}</p>
+  </section>;
+}
+
 function Model({ data }) {
   const { report } = data;
   const [live, setLive] = useState(null);
   const [calibration, setCalibration] = useState(null);
+  const [quality, setQuality] = useState(null);
   useEffect(() => {
     const controller = new AbortController();
     getData('live?recent=0', controller.signal).then((body) => setLive(body.summary)).catch(() => {});
     getData('calibration', controller.signal).then(setCalibration).catch(() => {});
+    getData('ai-quality', controller.signal).then(setQuality).catch(() => {});
     return () => controller.abort();
   }, []);
   const series = calibration ? [
@@ -181,6 +204,7 @@ function Model({ data }) {
       </div>
       <CalibrationChart series={series} />
     </section>}
+    <AiQuality quality={quality} />
     <section className="section">
       <h2>The model in four steps</h2>
       <ol className="steps">{steps.map(([title, text]) => <li key={title}><h3>{title}</h3><p>{text}</p></li>)}</ol>

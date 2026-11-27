@@ -166,6 +166,22 @@ class AttributionTests(unittest.TestCase):
         self.assertTrue(previews.rescore(old)[0]["passed"])
 
 
+class PromptTests(unittest.TestCase):
+    def test_raw_streak_codes_are_jargon(self):
+        facts = build_facts(ROWS[3], ROWS)
+        bad = dict(GOOD, preview=GOOD["preview"].replace("Boston is 2-0", "Boston is on a W2 streak at 2-0"))
+        self.assertTrue(any(p.startswith("jargon") for p in check(bad, facts)))
+
+    def test_v4_prompt_adds_only_the_streak_rule(self):
+        self.assertIn("never write codes", previews.PROMPTS["v4"])
+        self.assertNotIn("never write codes", previews.PROMPTS["v3"])
+        self.assertEqual(previews.PROMPTS["v4"].replace(previews.PROMPTS["v3"][:200], ""), previews.PROMPTS["v4"][200:])
+
+    def test_unknown_prompt_rejected(self):
+        with self.assertRaises(ValueError):
+            previews.GeminiClient("key", prompt="v99")
+
+
 class WriteTests(unittest.TestCase):
     facts = build_facts(ROWS[3], ROWS)
 

@@ -1,0 +1,45 @@
+# Once a week: write fresh previews and recaps for recent games, check them, have the AI judge
+# grade the previews, and append the scores to backend/eval/history.json. The How it works page
+# charts the history, so a drop in quality (say, after a model update) shows up.
+name: Weekly AI quality check
+
+on:
+  schedule:
+    - cron: "0 16 * * 1"   # Mondays, 16:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-forecasts   # never runs at the same time as the daily job, which also commits
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}   # without the secret, the check is skipped
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r backend/requirements.txt
+      - name: Score this week's AI text
+        if: ${{ env.GEMINI_API_KEY != '' }}
+        run: python backend/ai_eval.py weekly --limit 20
+      - name: Commit the results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase
+          git add backend/eval/
+          if git diff --cached --quiet; then
+            echo "Nothing new."
+          else
+            git commit -m "AI quality check for $(date +%Y-%m-%d)"
+            git push
+          fi

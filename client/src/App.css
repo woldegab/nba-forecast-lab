@@ -307,6 +307,15 @@ tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 .preview-tag { display: block; margin-top: 6px; font-size: 12px; color: var(--text-2); }
 .preview-tag::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--brand); margin-right: 6px; vertical-align: middle; }
 
+/* ---------- AI quality ---------- */
+.quality-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 20px 0 12px; }
+.quality-stats div { background: var(--surface); border-radius: 12px; padding: 16px; }
+.quality-stats dt { color: var(--text-2); font-size: 14px; }
+.quality-stats dd { font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.quality-trend { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.quality-trend .sparkline { width: 160px; height: 36px; }
+.ai-quality > p + p { margin-top: 8px; }
+
 /* ---------- loading placeholders ---------- */
 .bone { display: block; border-radius: 8px; background: var(--surface); position: relative; overflow: hidden; }
 .bone::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);

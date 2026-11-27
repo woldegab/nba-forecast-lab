@@ -18,6 +18,7 @@ from insights import calibration, power_rankings, team_histories
 
 DATA_DIR = Path(__file__).parent / "data" / "backtest"
 LIVE_DIR = Path(__file__).parent / "live"
+EVAL_DIR = Path(__file__).parent / "eval"
 # Built React app; served by the API in production so one service hosts both.
 STATIC_DIR = Path(os.environ.get("STATIC_DIR", Path(__file__).parent.parent / "client" / "dist"))
 
@@ -90,7 +91,7 @@ def load_live(folder):
     return summary, games
 
 
-def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
+def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR, eval_dir=EVAL_DIR):
     @asynccontextmanager
     async def lifespan(app):
         try:
@@ -144,15 +145,29 @@ def create_app(data_dir=DATA_DIR, live_dir=LIVE_DIR, static_dir=STATIC_DIR):
                     back_to_back=current["back_to_back"])
 
     def with_previews(summary, games):
-        """Attach saved plain-English previews (backend/previews.py) to their games."""
-        try:
-            saved = json.loads((Path(live_dir) / f"previews_{summary['season']}.json").read_text())
-        except (OSError, ValueError):
-            saved = {}
+        """Attach saved previews (backend/previews.py) and recaps (backend/recaps.py) to their games."""
+        def load(name):
+            try:
+                return json.loads((Path(live_dir) / f"{name}_{summary['season']}.json").read_text())
+            except (OSError, ValueError):
+                return {}
+        previews, recaps = load("previews"), load("recaps")
         for g in games:
-            p = saved.get(g["game_id"])
+            p, r = previews.get(g["game_id"]), recaps.get(g["game_id"])
             g["preview"] = dict(headline=p["headline"], text=p["preview"], source=p["source"]) if p else None
+            g["recap"] = dict(text=r["recap"], source=r["source"]) if r else None
         return summary, games
+
+    @app.get("/api/ai-quality")
+    def ai_quality():
+        """Weekly AI text quality (backend/ai_eval.py weekly) and the judge's agreement with hand labels."""
+        def read(name):
+            try:
+                return json.loads((Path(eval_dir) / name).read_text())
+            except (OSError, ValueError):
+                return None
+        judge = read("judge_eval.json")
+        return dict(history=read("history.json") or [], judge=judge["stats"] if judge else None)
 
     def live_games():
         try:

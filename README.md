@@ -93,7 +93,33 @@ GEMINI_API_KEY=... python backend/previews.py update   # today's previews (templ
 GEMINI_API_KEY=... python backend/previews.py eval     # pass rate on 30 recent games -> backend/PREVIEW_EVAL.md
 ```
 
+After each game, `backend/recaps.py` writes a one- or two-sentence recap comparing the
+forecast with the final score, with its own checks: scores must match (winner first), the
+winner can't be swapped, and it can't say the model was right when it missed or call an
+expected win an upset.
+
 The daily workflow reads the key from the `GEMINI_API_KEY` repository secret.
+
+### Measuring the AI text
+
+`backend/ai_eval.py` evaluates the writing beyond the rule checks:
+
+```sh
+python backend/ai_eval.py label      # grade saved previews yourself, good or bad (no API calls)
+python backend/ai_eval.py judge      # an AI judge grades the same ones; agreement and Cohen's kappa
+python backend/ai_eval.py compare --variants gemini-flash-lite-latest:v3 gemini-flash-lite-latest:v4
+python backend/ai_eval.py weekly     # previews + recaps + judge on recent games -> eval/history.json
+```
+
+- **Judge:** catches what rules can't (jargon, dull or unhelpful wording), but only after it
+  agrees with hand labels. The report shows agreement, kappa and every disagreement.
+- **Compare:** runs model or prompt versions on the same games and recommends switching only
+  for a clear win (at least 2 more games passing).
+- **Weekly:** a GitHub Action (`weekly-ai-eval.yml`) runs every Monday and commits the scores;
+  the How it works page charts them, so a drop after a model update is visible.
+
+Evaluation history: [v1](backend/PREVIEW_EVAL_v1.md) (30/30, checks too lenient),
+[v2](backend/PREVIEW_EVAL_v2.md) (stricter checks), [v3](backend/PREVIEW_EVAL.md) (27/30 after fixing checker bugs).
 
 ## Run it locally
 
