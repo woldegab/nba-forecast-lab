@@ -1,16 +1,12 @@
 import { useEffect, useState } from 'react';
-import GameCard, { Logo, Preview } from './GameCard';
+import { MatchupTile, ResultRow } from './Slate';
 import Court from './Court';
 import { GameSkeletons, Loading } from './Skeleton';
 import { getData } from '../services/nbaApi';
-import { isEven } from '../utils/forecast';
-import { teamInfo } from '../utils/teams';
 
 const pct = (value) => `${(value * 100).toFixed(1)}%`;
-const whole = (value) => `${Math.round(value * 100)}%`;
 const longDate = (day) => new Date(`${day}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 const shortDate = (day) => new Date(`${day}T12:00:00`).toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-const tipoff = (iso) => new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' });
 
 function byDate(games) {
   const groups = [];
@@ -22,51 +18,22 @@ function byDate(games) {
   return groups;
 }
 
-function RecordCard({ summary, change }) {
+// The live record as a row of numbers under the headline.
+function RecordStrip({ summary, change }) {
   const live = summary.live;
-  if (!live.games) return <aside className="record-card"><p className="muted">The live record starts once the first forecasted games finish.</p></aside>;
+  if (!live.games) return <p className="muted record-strip-empty">The live record starts once the first forecasted games finish.</p>;
   const wins = Math.round(live.accuracy * live.games);
   const homeWins = Math.round(live.home_win_rate * live.games);
-  return <aside className="record-card" aria-label="Live record">
-    <p className="muted">Record since {shortDate(summary.first_live_date)}</p>
-    <p className="record-number">{wins}–{live.games - wins}</p>
-    <dl className="record-facts">
+  return <section aria-label="Live record">
+    <dl className="record-strip">
+      <div><dt>Record since {shortDate(summary.first_live_date)}</dt><dd>{wins}–{live.games - wins}</dd></div>
       <div><dt>Correct picks</dt><dd>{pct(live.accuracy)}</dd></div>
-      <div><dt>Always pick home team</dt><dd>{homeWins}–{live.games - homeWins}</dd></div>
+      <div><dt>Always picking home</dt><dd>{homeWins}–{live.games - homeWins}</dd></div>
       <div><dt>Brier score</dt><dd>{live.brier.toFixed(3)}</dd></div>
     </dl>
-    {change && <p className="muted small model-change">Model updated {shortDate(new Date(change.since).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }))}: newer forecasts also count margin of victory and back-to-backs. Earlier forecasts are unchanged.</p>}
-  </aside>;
-}
-
-// The day's closest game, shown large with both teams' colors meeting in the middle.
-function FeaturedGame({ game }) {
-  const away = teamInfo(game.away_team);
-  const home = teamInfo(game.home_team);
-  const even = isEven(game);
-  // "Closest" only when it really is close; on lopsided slates it's just the featured game.
-  const label = Math.max(game.home_win_probability, game.away_win_probability) <= 0.6 ? 'Closest game today' : 'Featured game';
-  return <article className="featured" style={{ '--away': away.color, '--home': home.color }} aria-label={`${label}: ${away.fullName} at ${home.fullName}`}>
-    <p className="featured-label">{label}, {tipoff(game.tipoff_utc)} ET</p>
-    <div className="featured-teams">
-      <div className={`featured-side${!even && game.away_win_probability > 0.5 ? ' favorite' : ''}`} style={{ '--team': away.color }}>
-        <Logo abbreviation={game.away_team} />
-        <span className="team-text"><strong>{away.name}</strong><small>{away.city}</small></span>
-        <span className="featured-pct">{whole(game.away_win_probability)}</span>
-      </div>
-      <span className="featured-at" aria-hidden="true">{game.neutral_site ? 'vs' : 'at'}</span>
-      <div className={`featured-side home${!even && game.home_win_probability > 0.5 ? ' favorite' : ''}`} style={{ '--team': home.color }}>
-        <Logo abbreviation={game.home_team} />
-        <span className="team-text"><strong>{home.name}</strong><small>{home.city}</small></span>
-        <span className="featured-pct">{whole(game.home_win_probability)}</span>
-      </div>
-    </div>
-    <div className="split big" aria-hidden="true">
-      <span style={{ flexGrow: game.away_win_probability, background: away.color }} />
-      <span style={{ flexGrow: game.home_win_probability, background: home.color }} />
-    </div>
-    <Preview preview={game.preview} />
-  </article>;
+    <p className="muted small record-note">Each forecast is saved before tip-off and never changed.
+      {change && <> Model updated {shortDate(new Date(change.since).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }))}: newer forecasts also count margin of victory and back-to-backs.</>}</p>
+  </section>;
 }
 
 // One earlier day of the season, with how the forecasts did.
@@ -91,7 +58,7 @@ function PastDay({ date }) {
     {backfill > 0 && <p className="muted small past-note">{backfill === state.games.length
       ? 'These games were scored afterward, using only results from before each game. They aren\'t part of the record.'
       : `${backfill} of these games were scored afterward and aren't part of the record; the other ${live.length} were saved before tip-off.`}</p>}
-    <div className="card-grid">{state.games.map((game) => <GameCard key={game.game_id} game={game} />)}</div>
+    <ul className="results">{state.games.map((game) => <ResultRow key={game.game_id} game={game} />)}</ul>
   </section>;
 }
 
@@ -128,6 +95,7 @@ export default function Tonight({ onArchive }) {
   const [attempt, setAttempt] = useState(0);
   const [day, setDay] = useState(null); // null means today
   const [days, setDays] = useState([]);
+  const [shownDays, setShownDays] = useState(1); // recent results: newest day first, more on request
   useEffect(() => {
     const controller = new AbortController();
     getData('live/days', controller.signal).then((data) => setDays(data.days.map((d) => d.date))).catch(() => {});
@@ -150,39 +118,32 @@ export default function Tonight({ onArchive }) {
 
   const { summary, upcoming, recent } = state.data;
   const today = upcoming[0]?.date;
-  const featured = upcoming.length > 1
-    ? upcoming.reduce((best, g) => (Math.abs(g.home_win_probability - 0.5) < Math.abs(best.home_win_probability - 0.5) ? g : best))
-    : null;
-  const others = upcoming.filter((g) => g !== featured);
   const todayDate = today || new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   const shown = day || todayDate;
+  const yesterday = new Date(new Date(`${todayDate}T12:00:00Z`).getTime() - 864e5).toISOString().slice(0, 10);
   const previous = days.filter((d) => d < shown).at(-1);
   const next = day ? (days.find((d) => d > shown && d < todayDate) || todayDate) : null;
   const pick = (picked) => setDay(picked === todayDate ? null : picked);
   return <>
-    <section className="intro">
-      <div>
-        <h1>{day ? 'Earlier this season' : today ? "Today's games" : 'Today'}</h1>
-        <DayNav shown={shown} previous={previous} next={next} isToday={!day} onPick={pick} />
-        <p className="intro-note">Each forecast is saved before tip-off and never changed, so the record can't be adjusted after the fact.</p>
-      </div>
-      <RecordCard summary={summary} change={state.data.model_change} />
+    <section className="today-head">
+      <h1>{day ? 'Earlier this season' : upcoming.length ? `${upcoming.length} game${upcoming.length === 1 ? '' : 's'} tonight` : 'Today'}</h1>
+      <DayNav shown={shown} previous={previous} next={next} isToday={!day} onPick={pick} />
+      <RecordStrip summary={summary} change={state.data.model_change} />
     </section>
 
     {day ? <PastDay key={day} date={day} /> : <>
     {upcoming.length === 0 && <EmptyDay next={summary.next_games} today={todayDate} />}
-    {featured && <FeaturedGame game={featured} />}
-    {others.length > 0 && <div className="card-grid">{others.map((game) => <GameCard key={game.game_id} game={game} animate />)}</div>}
+    {upcoming.length > 0 && <div className="tiles">{upcoming.map((game) => <MatchupTile key={game.game_id} game={game} />)}</div>}
 
-    {recent.length > 0 && <section className="section">
-      <h2>Recent results</h2>
-      {byDate(recent).map((group) => {
+    {recent.length > 0 && <section className="section recent" aria-label="Recent results">
+      {byDate(recent).slice(0, shownDays).map((group) => {
         const hits = group.games.filter((game) => game.correct).length;
         return <div className="day" key={group.date}>
-          <h3>{longDate(group.date)}<span className="muted"> {hits} of {group.games.length} correct</span></h3>
-          <div className="card-grid">{group.games.map((game) => <GameCard key={game.game_id} game={game} />)}</div>
+          <h2>{group.date === yesterday ? 'Yesterday' : longDate(group.date)}<span className="muted"> {hits} of {group.games.length} correct</span></h2>
+          <ul className="results">{group.games.map((game) => <ResultRow key={game.game_id} game={game} />)}</ul>
         </div>;
       })}
+      {byDate(recent).length > shownDays && <button className="pill show-more" onClick={() => setShownDays((n) => n + 2)}>Show earlier days</button>}
     </section>}
 
     </>}

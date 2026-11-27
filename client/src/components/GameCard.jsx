@@ -70,6 +70,18 @@ function restAdjustment(game) {
   return Math.abs(gap) < 5 ? null : { side: gap < 0 ? 'home' : 'away', points: Math.abs(gap) };
 }
 
+// Plain-English reasoning behind a forecast: ratings, home court and any back-to-back penalty.
+export function WhyThisForecast({ game }) {
+  const away = teamInfo(game.away_team);
+  const home = teamInfo(game.home_team);
+  const rest = restAdjustment(game);
+  const tired = rest && (rest.side === 'home' ? home.name : away.name);
+  return <p>{away.name} are rated {Math.round(game.away_rating)} and the {home.name} {Math.round(game.home_rating)}.
+    {game.neutral_site ? ' Neither team gets a home-court boost at a neutral site.' : ' The home team gets a 65-point boost.'}
+    {tired && ` The ${tired} played the night before, so they lose ${rest.points} points for this game.`}
+    {' '}Ratings only count games from earlier days.{isEven(game) && ' When a game is a true 50/50, the home team counts as the pick.'}</p>;
+}
+
 export default function GameCard({ game, showResults = true, onExplore, animate = false }) {
   // Bars start even and grow to the forecast split once, when the card first appears.
   const [grown, setGrown] = useState(!animate);
@@ -82,9 +94,6 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
   const reveal = final && showResults;
   const away = teamInfo(game.away_team);
   const home = teamInfo(game.home_team);
-  const rest = restAdjustment(game);
-  const tired = rest && (rest.side === 'home' ? home.name : away.name);
-  const restPenalty = rest?.points;
   const even = isEven(game);
   const homeFavored = !even && game.home_win_probability > 0.5;
   const awayFavored = !even && game.home_win_probability < 0.5;
@@ -110,10 +119,7 @@ export default function GameCard({ game, showResults = true, onExplore, animate 
     <div className="game-actions">
       <details>
         <summary>Why this forecast</summary>
-        <p>{away.name} are rated {Math.round(game.away_rating)} and the {home.name} {Math.round(game.home_rating)}.
-          {game.neutral_site ? ' Neither team gets a home-court boost at a neutral site.' : ' The home team gets a 65-point boost.'}
-          {tired && ` The ${tired} played the night before, so they lose ${restPenalty} points for this game.`}
-          {' '}Ratings only count games from earlier days.{even && ' When a game is a true 50/50, the home team counts as the pick.'}</p>
+        <WhyThisForecast game={game} />
       </details>
       {onExplore && <button className="text-link" onClick={onExplore}>Player matchups</button>}
     </div>
