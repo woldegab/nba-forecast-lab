@@ -101,6 +101,71 @@ class CheckTests(unittest.TestCase):
             self.assertEqual(check(template(facts), facts), [], game["game_id"])
 
 
+class ClaimTests(unittest.TestCase):
+    facts = build_facts(ROWS[3], ROWS)   # Celtics 64%, streak W2; Knicks streak L2
+
+    def test_percent_spelled_out_is_checked(self):
+        bad = dict(GOOD, preview=GOOD["preview"].replace("64%", "70 percent"))
+        self.assertTrue(any("percentages" in p for p in check(bad, self.facts)))
+
+    def test_false_streak_claim_fails(self):
+        bad = dict(GOOD, preview=GOOD["preview"] + " Both teams are coming off recent wins.")
+        self.assertTrue(any("calls the Knicks winning" in p for p in check(bad, self.facts)))
+
+    def test_true_streak_claim_passes(self):
+        ok = dict(GOOD, preview=GOOD["preview"].replace("Boston is 2-0", "Boston is on a winning streak at 2-0"))
+        self.assertEqual(check(ok, self.facts), [])
+
+    def test_confidence_words_must_match_the_chance(self):
+        strong = dict(GOOD, preview=GOOD["preview"].replace("gives the Celtics", "strongly favors the Celtics, giving them"))
+        self.assertTrue(any("strong favorite" in p for p in check(strong, self.facts)))
+        close = dict(GOOD, preview=GOOD["preview"] + " Expect a close game.")
+        self.assertTrue(any("close game" in p for p in check(close, self.facts)))   # 64% is above the 60% line
+        slight = build_facts(row("9", "2026-11-26", "NYK", "BOS", 0.45), ROWS)
+        ok = dict(GOOD, preview="The model gives the Celtics a slight edge at 55% in New York. The Knicks are "
+                                "0-2 this season, and Boston is 2-0 after winning both of its first games.")
+        self.assertEqual(check(ok, slight), [])
+
+    def test_close_game_wording_rejected_for_big_favorite(self):
+        rows = ROWS[:3] + [row("4", "2026-11-26", "NYK", "BOS", 0.2)]
+        facts = build_facts(rows[3], rows)
+        bad = dict(GOOD, preview=GOOD["preview"].replace("64%", "80%") + " It should be a tight game.")
+        self.assertTrue(any("close game" in p for p in check(bad, facts)))
+
+
+class AttributionTests(unittest.TestCase):
+    def facts(self, home, away, p, home_streak, away_streak):
+        f = build_facts(row("9", "2026-11-26", home, away, p), ROWS)
+        f["home"]["streak"], f["away"]["streak"] = home_streak, away_streak
+        return f
+
+    def test_short_city_does_not_match_inside_words(self):
+        facts = self.facts("MEM", "LAC", 0.59, "W1", "L4")
+        text = dict(headline="Clippers at Grizzlies", preview="The model gives the Grizzlies a 59% chance at home. "
+                    "Memphis brings a 7-3 last-10 record and a 1-game win streak, while the Clippers have dropped 4 straight.")
+        self.assertEqual([p for p in check(text, facts) if p.startswith("streak")], [])
+
+    def test_streak_belongs_to_team_named_before_it(self):
+        facts = self.facts("CHI", "DEN", 0.28, "L1", "W2")
+        text = dict(headline="Nuggets at Bulls", preview="The model makes the Nuggets a heavy favorite with a 72% win "
+                    "chance. Denver brings a 7-3 last-10 record and a two-game win streak into the game against Chicago, which is 4-11.")
+        self.assertEqual([p for p in check(text, facts) if p.startswith("streak")], [])
+
+    def test_wrong_team_still_caught(self):
+        facts = self.facts("CHI", "DEN", 0.28, "L1", "W2")
+        text = dict(headline="Nuggets at Bulls", preview="The model makes the Nuggets a heavy favorite with a 72% win "
+                    "chance. Chicago is on a winning streak but Denver is 7-3 in its last 10 games.")
+        self.assertTrue(any("calls the Bulls winning" in p for p in check(text, facts)))
+
+    def test_rescore_uses_saved_outputs(self):
+        facts = self.facts("MEM", "LAC", 0.59, "W1", "L4")
+        draft = dict(headline="Clippers at Grizzlies", preview="The model gives the Grizzlies a 59% chance at home, "
+                     "and Memphis is 1-0 in its last game while the Clippers have lost 4 straight games coming in.")
+        old = [dict(game_id="9", date="2026-11-26", passed=False, problems=["stale"], preview=draft["preview"],
+                    draft=draft, facts=facts)]
+        self.assertTrue(previews.rescore(old)[0]["passed"])
+
+
 class WriteTests(unittest.TestCase):
     facts = build_facts(ROWS[3], ROWS)
 
@@ -156,6 +221,23 @@ class UpdateTests(unittest.TestCase):
                 self.assertEqual(previews.main(["update", "--live-dir", folder, "--now", NOW.isoformat()]), 0)
             saved = json.loads((live / previews.PREVIEW_FILE).read_text())
             self.assertEqual(saved["4"]["source"], "template")
+
+
+class PacingTests(unittest.TestCase):
+    def test_waits_between_requests_and_retries_once_when_asked(self):
+        waits = []
+        client = previews.Paced(FakeClient(GOOD, QuotaError("slow down", wait=20), GOOD), pace=6, sleep=waits.append)
+        client.write({}); client.write({})
+        self.assertEqual(waits, [6, 21])
+
+    def test_daily_limit_is_not_retried(self):
+        client = previews.Paced(FakeClient(QuotaError("daily", wait=None)), pace=0, sleep=lambda s: None)
+        with self.assertRaises(QuotaError):
+            client.write({})
+
+    def test_eval_keeps_results_before_the_limit(self):
+        results = previews.evaluate(ROWS, FakeClient(GOOD, QuotaError("limit")))
+        self.assertEqual(len(results), 1)
 
 
 class EvalTests(unittest.TestCase):

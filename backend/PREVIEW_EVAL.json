@@ -1,0 +1,1148 @@
+{
+  "model": "gemini-flash-lite-latest",
+  "results": [
+    {
+      "game_id": "0022600279",
+      "date": "2026-11-21",
+      "passed": true,
+      "problems": [],
+      "preview": "The model makes the Celtics a heavy favorite with an 82% win chance against the Kings. Boston holds an 11-4 record and goes up against Sacramento, which sits at 1-14 with an eight-game losing streak.",
+      "draft": {
+        "headline": "Celtics vs Kings Preview",
+        "preview": "The model makes the Celtics a heavy favorite with an 82% win chance against the Kings. Boston holds an 11-4 record and goes up against Sacramento, which sits at 1-14 with an eight-game losing streak."
+      },
+      "facts": {
+        "game_id": "0022600279",
+        "date": "2026-11-21",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "SAC",
+          "city": "Sacramento",
+          "name": "Kings",
+          "win_chance": 18,
+          "record": "1-14",
+          "last10": "1-9",
+          "streak": "L8",
+          "played_yesterday": true
+        },
+        "away": {
+          "abbr": "BOS",
+          "city": "Boston",
+          "name": "Celtics",
+          "win_chance": 82,
+          "record": "11-4",
+          "last10": "7-3",
+          "streak": "L2",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600280",
+      "date": "2026-11-22",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Hawks a 51% chance against the Pistons in a close game. Atlanta is coming off a win with a 7-3 last-10 record and a 3-game winning streak.",
+      "draft": {
+        "headline": "Hawks Host Pistons in Close Matchup",
+        "preview": "The model gives the Hawks a 51% chance against the Pistons in a close game. Atlanta is coming off a win with a 7-3 last-10 record and a 3-game winning streak."
+      },
+      "facts": {
+        "game_id": "0022600280",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "ATL",
+          "city": "Atlanta",
+          "name": "Hawks",
+          "win_chance": 51,
+          "record": "10-6",
+          "last10": "7-3",
+          "streak": "W3",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "DET",
+          "city": "Detroit",
+          "name": "Pistons",
+          "win_chance": 49,
+          "record": "10-5",
+          "last10": "6-4",
+          "streak": "L1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600281",
+      "date": "2026-11-22",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Thunder a 57% chance against the Heat. Oklahoma City holds a 10-6 record and is on a W1 streak, while Miami sits at 9-6 and is hot with an 8-2 last-10 record and W6 streak.",
+      "draft": {
+        "headline": "Thunder and Heat Face Off",
+        "preview": "The model gives the Thunder a 57% chance against the Heat. Oklahoma City holds a 10-6 record and is on a W1 streak, while Miami sits at 9-6 and is hot with an 8-2 last-10 record and W6 streak."
+      },
+      "facts": {
+        "game_id": "0022600281",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "MIA",
+          "city": "Miami",
+          "name": "Heat",
+          "win_chance": 43,
+          "record": "9-6",
+          "last10": "8-2",
+          "streak": "W6",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "OKC",
+          "city": "Oklahoma City",
+          "name": "Thunder",
+          "win_chance": 57,
+          "record": "10-6",
+          "last10": "6-4",
+          "streak": "W1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600282",
+      "date": "2026-11-22",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Magic a 66% chance against the Wizards. Orlando holds a 7-8 record and is coming off a win, while Washington sits at 6-11 with a two-game win streak.",
+      "draft": {
+        "headline": "Magic Visit Wizards on November 22",
+        "preview": "The model gives the Magic a 66% chance against the Wizards. Orlando holds a 7-8 record and is coming off a win, while Washington sits at 6-11 with a two-game win streak."
+      },
+      "facts": {
+        "game_id": "0022600282",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "WAS",
+          "city": "Washington",
+          "name": "Wizards",
+          "win_chance": 34,
+          "record": "6-11",
+          "last10": "2-8",
+          "streak": "W2",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "ORL",
+          "city": "Orlando",
+          "name": "Magic",
+          "win_chance": 66,
+          "record": "7-8",
+          "last10": "5-5",
+          "streak": "W1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600283",
+      "date": "2026-11-22",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Nuggets a 72% chance to win as heavy favorites against the Bulls. Denver brings a two-game winning streak and a 7-3 record in their last ten games. Chicago holds a 4-11 record and comes in after a recent loss.",
+      "draft": {
+        "headline": "Nuggets face Bulls in Chicago",
+        "preview": "The model gives the Nuggets a 72% chance to win as heavy favorites against the Bulls. Denver brings a two-game winning streak and a 7-3 record in their last ten games. Chicago holds a 4-11 record and comes in after a recent loss."
+      },
+      "facts": {
+        "game_id": "0022600283",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "CHI",
+          "city": "Chicago",
+          "name": "Bulls",
+          "win_chance": 28,
+          "record": "4-11",
+          "last10": "3-7",
+          "streak": "L1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "DEN",
+          "city": "Denver",
+          "name": "Nuggets",
+          "win_chance": 72,
+          "record": "9-5",
+          "last10": "7-3",
+          "streak": "W2",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600284",
+      "date": "2026-11-22",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Mavericks a 60% chance against the Jazz. Dallas brings a 9-7 record and a two-game win streak, while Utah sits at 3-14.",
+      "draft": {
+        "headline": "Jazz host Mavericks on November 22",
+        "preview": "The model gives the Mavericks a 60% chance against the Jazz. Dallas brings a 9-7 record and a two-game win streak, while Utah sits at 3-14."
+      },
+      "facts": {
+        "game_id": "0022600284",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "UTA",
+          "city": "Utah",
+          "name": "Jazz",
+          "win_chance": 40,
+          "record": "3-14",
+          "last10": "2-8",
+          "streak": "L1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "DAL",
+          "city": "Dallas",
+          "name": "Mavericks",
+          "win_chance": 60,
+          "record": "9-7",
+          "last10": "5-5",
+          "streak": "W2",
+          "played_yesterday": true
+        }
+      }
+    },
+    {
+      "game_id": "0022600285",
+      "date": "2026-11-22",
+      "passed": true,
+      "problems": [],
+      "preview": "The model makes the Knicks a heavy favorite with an 85% chance to win. New York brings an 8-2 last-10 record and a four-game win streak into the game. Indiana sits at 3-7 in its last 10 and has lost three straight.",
+      "draft": {
+        "headline": "Knicks Host Pacers on November 22",
+        "preview": "The model makes the Knicks a heavy favorite with an 85% chance to win. New York brings an 8-2 last-10 record and a four-game win streak into the game. Indiana sits at 3-7 in its last 10 and has lost three straight."
+      },
+      "facts": {
+        "game_id": "0022600285",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "NYK",
+          "city": "New York",
+          "name": "Knicks",
+          "win_chance": 85,
+          "record": "10-6",
+          "last10": "8-2",
+          "streak": "W4",
+          "played_yesterday": true
+        },
+        "away": {
+          "abbr": "IND",
+          "city": "Indiana",
+          "name": "Pacers",
+          "win_chance": 15,
+          "record": "5-11",
+          "last10": "3-7",
+          "streak": "L3",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600286",
+      "date": "2026-11-22",
+      "passed": false,
+      "problems": [
+        "confidence: says close game at 64%"
+      ],
+      "preview": "The model gives the Celtics a 64% chance against the Warriors. Boston holds an 11-5 record while Golden State enters with an 8-8 record and a 5-5 last-10.",
+      "draft": {
+        "headline": "Celtics visit Warriors with a slight edge",
+        "preview": "The model gives the Celtics a 64% chance against the Warriors. Boston holds an 11-5 record while Golden State enters with an 8-8 record and a 5-5 last-10."
+      },
+      "facts": {
+        "game_id": "0022600286",
+        "date": "2026-11-22",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "GSW",
+          "city": "Golden State",
+          "name": "Warriors",
+          "win_chance": 36,
+          "record": "8-8",
+          "last10": "5-5",
+          "streak": "L5",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "BOS",
+          "city": "Boston",
+          "name": "Celtics",
+          "win_chance": 64,
+          "record": "11-5",
+          "last10": "6-4",
+          "streak": "L3",
+          "played_yesterday": true
+        }
+      }
+    },
+    {
+      "game_id": "0022600287",
+      "date": "2026-11-23",
+      "passed": false,
+      "problems": [
+        "confidence: says close game at 63%"
+      ],
+      "preview": "The model gives the Hornets a slight edge with a 63% win chance at home. Charlotte holds a 4-11 record and is on a 4-game losing streak, while the Grizzlies sit at 12-5.",
+      "draft": {
+        "headline": "Hornets Host Grizzlies in Charlotte",
+        "preview": "The model gives the Hornets a slight edge with a 63% win chance at home. Charlotte holds a 4-11 record and is on a 4-game losing streak, while the Grizzlies sit at 12-5."
+      },
+      "facts": {
+        "game_id": "0022600287",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "CHA",
+          "city": "Charlotte",
+          "name": "Hornets",
+          "win_chance": 63,
+          "record": "4-11",
+          "last10": "1-9",
+          "streak": "L4",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "MEM",
+          "city": "Memphis",
+          "name": "Grizzlies",
+          "win_chance": 37,
+          "record": "12-5",
+          "last10": "6-4",
+          "streak": "L1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600288",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the 76ers a 64% chance against the Trail Blazers. Philadelphia brings a five-game win streak into the home game with an 8-2 record in its last ten.",
+      "draft": {
+        "headline": "76ers host Trail Blazers with 64% win chance",
+        "preview": "The model gives the 76ers a 64% chance against the Trail Blazers. Philadelphia brings a five-game win streak into the home game with an 8-2 record in its last ten."
+      },
+      "facts": {
+        "game_id": "0022600288",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "PHI",
+          "city": "Philadelphia",
+          "name": "76ers",
+          "win_chance": 64,
+          "record": "14-3",
+          "last10": "8-2",
+          "streak": "W5",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "POR",
+          "city": "Portland",
+          "name": "Trail Blazers",
+          "win_chance": 36,
+          "record": "10-6",
+          "last10": "5-5",
+          "streak": "L1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600289",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model favors the Thunder as a heavy favorite with a 78% win chance over the Pacers. Oklahoma City is 10-7 on the season with an L1 streak, while Indiana sits at 5-12 with an L4 streak.",
+      "draft": {
+        "headline": "Thunder Visit Pacers",
+        "preview": "The model favors the Thunder as a heavy favorite with a 78% win chance over the Pacers. Oklahoma City is 10-7 on the season with an L1 streak, while Indiana sits at 5-12 with an L4 streak."
+      },
+      "facts": {
+        "game_id": "0022600289",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "IND",
+          "city": "Indiana",
+          "name": "Pacers",
+          "win_chance": 22,
+          "record": "5-12",
+          "last10": "3-7",
+          "streak": "L4",
+          "played_yesterday": true
+        },
+        "away": {
+          "abbr": "OKC",
+          "city": "Oklahoma City",
+          "name": "Thunder",
+          "win_chance": 78,
+          "record": "10-7",
+          "last10": "5-5",
+          "streak": "L1",
+          "played_yesterday": true
+        }
+      }
+    },
+    {
+      "game_id": "0022600290",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Raptors a heavy favorite 76% chance at home. Toronto enters with a 6-10 record and a W1 streak, while Milwaukee sits at 1-16 with an L13 streak and 0-10 in its last 10.",
+      "draft": {
+        "headline": "Toronto Raptors host the Milwaukee Bucks",
+        "preview": "The model gives the Raptors a heavy favorite 76% chance at home. Toronto enters with a 6-10 record and a W1 streak, while Milwaukee sits at 1-16 with an L13 streak and 0-10 in its last 10."
+      },
+      "facts": {
+        "game_id": "0022600290",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "TOR",
+          "city": "Toronto",
+          "name": "Raptors",
+          "win_chance": 76,
+          "record": "6-10",
+          "last10": "3-7",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "MIL",
+          "city": "Milwaukee",
+          "name": "Bucks",
+          "win_chance": 24,
+          "record": "1-16",
+          "last10": "0-10",
+          "streak": "L13",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600291",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Timberwolves a heavy favorite 87% win chance at home against the Nets. Minnesota holds a 12-5 record and is coming off a win with a W1 streak. Meanwhile, Brooklyn sits at 3-12 and has dropped 4 in a row with an L4 streak.",
+      "draft": {
+        "headline": "Timberwolves Host Nets in Minnesota",
+        "preview": "The model gives the Timberwolves a heavy favorite 87% win chance at home against the Nets. Minnesota holds a 12-5 record and is coming off a win with a W1 streak. Meanwhile, Brooklyn sits at 3-12 and has dropped 4 in a row with an L4 streak."
+      },
+      "facts": {
+        "game_id": "0022600291",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "MIN",
+          "city": "Minnesota",
+          "name": "Timberwolves",
+          "win_chance": 87,
+          "record": "12-5",
+          "last10": "8-2",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "BKN",
+          "city": "Brooklyn",
+          "name": "Nets",
+          "win_chance": 13,
+          "record": "3-12",
+          "last10": "3-7",
+          "streak": "L4",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600292",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Cavaliers a 66% chance to win. Cleveland brings a 5-5 record in their last ten games, while the Bulls carry a two-game losing streak and a 3-7 last-ten record.",
+      "draft": {
+        "headline": "Cavaliers face Bulls on November 23",
+        "preview": "The model gives the Cavaliers a 66% chance to win. Cleveland brings a 5-5 record in their last ten games, while the Bulls carry a two-game losing streak and a 3-7 last-ten record."
+      },
+      "facts": {
+        "game_id": "0022600292",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "CHI",
+          "city": "Chicago",
+          "name": "Bulls",
+          "win_chance": 34,
+          "record": "4-12",
+          "last10": "3-7",
+          "streak": "L2",
+          "played_yesterday": true
+        },
+        "away": {
+          "abbr": "CLE",
+          "city": "Cleveland",
+          "name": "Cavaliers",
+          "win_chance": 66,
+          "record": "9-8",
+          "last10": "5-5",
+          "streak": "W1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600293",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Suns a 63% chance to win with a 3-game streak. The Pelicans have lost 3 straight and hold a 1-9 record in their last 10 games.",
+      "draft": {
+        "headline": "Suns visit Pelicans",
+        "preview": "The model gives the Suns a 63% chance to win with a 3-game streak. The Pelicans have lost 3 straight and hold a 1-9 record in their last 10 games."
+      },
+      "facts": {
+        "game_id": "0022600293",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "NOP",
+          "city": "New Orleans",
+          "name": "Pelicans",
+          "win_chance": 37,
+          "record": "5-13",
+          "last10": "1-9",
+          "streak": "L3",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "PHX",
+          "city": "Phoenix",
+          "name": "Suns",
+          "win_chance": 63,
+          "record": "8-7",
+          "last10": "7-3",
+          "streak": "W3",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600294",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Rockets a heavy favorite 76% chance to win over the Clippers. Houston holds a 12-5 record and is 6-4 in its last 10, while LA is 4-11 with a 3-7 last-10 mark and a 3-game losing streak.",
+      "draft": {
+        "headline": "Rockets Host Clippers",
+        "preview": "The model gives the Rockets a heavy favorite 76% chance to win over the Clippers. Houston holds a 12-5 record and is 6-4 in its last 10, while LA is 4-11 with a 3-7 last-10 mark and a 3-game losing streak."
+      },
+      "facts": {
+        "game_id": "0022600294",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "HOU",
+          "city": "Houston",
+          "name": "Rockets",
+          "win_chance": 76,
+          "record": "12-5",
+          "last10": "6-4",
+          "streak": "L1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "LAC",
+          "city": "LA",
+          "name": "Clippers",
+          "win_chance": 24,
+          "record": "4-11",
+          "last10": "3-7",
+          "streak": "L3",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600295",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Lakers a heavy favorite 91% chance to win over the Jazz. The Lakers hold a 14-3 record and a W1 streak, while the Jazz carry a 3-15 record and an L2 streak.",
+      "draft": {
+        "headline": "Lakers Host Jazz",
+        "preview": "The model gives the Lakers a heavy favorite 91% chance to win over the Jazz. The Lakers hold a 14-3 record and a W1 streak, while the Jazz carry a 3-15 record and an L2 streak."
+      },
+      "facts": {
+        "game_id": "0022600295",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "LAL",
+          "city": "Los Angeles",
+          "name": "Lakers",
+          "win_chance": 91,
+          "record": "14-3",
+          "last10": "9-1",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "UTA",
+          "city": "Utah",
+          "name": "Jazz",
+          "win_chance": 9,
+          "record": "3-15",
+          "last10": "2-8",
+          "streak": "L2",
+          "played_yesterday": true
+        }
+      }
+    },
+    {
+      "game_id": "0022600296",
+      "date": "2026-11-23",
+      "passed": true,
+      "problems": [],
+      "preview": "The model makes the Spurs a heavy favorite with an 83% chance to win. San Antonio brings a 14-3 record and a two-game win streak into Sacramento. The Kings hold a 2-14 record and went 2-8 in their last ten.",
+      "draft": {
+        "headline": "Spurs face Kings in Sacramento",
+        "preview": "The model makes the Spurs a heavy favorite with an 83% chance to win. San Antonio brings a 14-3 record and a two-game win streak into Sacramento. The Kings hold a 2-14 record and went 2-8 in their last ten."
+      },
+      "facts": {
+        "game_id": "0022600296",
+        "date": "2026-11-23",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "SAC",
+          "city": "Sacramento",
+          "name": "Kings",
+          "win_chance": 17,
+          "record": "2-14",
+          "last10": "2-8",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "SAS",
+          "city": "San Antonio",
+          "name": "Spurs",
+          "win_chance": 83,
+          "record": "14-3",
+          "last10": "9-1",
+          "streak": "W2",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600052",
+      "date": "2026-11-24",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Pistons a 56% chance against the Magic. Detroit brings a 10-6 record and a two-game skid, while Orlando sits at 7-9 after a recent loss.",
+      "draft": {
+        "headline": "Pistons and Magic Face Off in Orlando",
+        "preview": "The model gives the Pistons a 56% chance against the Magic. Detroit brings a 10-6 record and a two-game skid, while Orlando sits at 7-9 after a recent loss."
+      },
+      "facts": {
+        "game_id": "0022600052",
+        "date": "2026-11-24",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "ORL",
+          "city": "Orlando",
+          "name": "Magic",
+          "win_chance": 44,
+          "record": "7-9",
+          "last10": "5-5",
+          "streak": "L1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "DET",
+          "city": "Detroit",
+          "name": "Pistons",
+          "win_chance": 56,
+          "record": "10-6",
+          "last10": "5-5",
+          "streak": "L2",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600053",
+      "date": "2026-11-24",
+      "passed": false,
+      "problems": [
+        "request failed: HTTPStatusError"
+      ],
+      "preview": "",
+      "draft": {},
+      "facts": {
+        "game_id": "0022600053",
+        "date": "2026-11-24",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "WAS",
+          "city": "Washington",
+          "name": "Wizards",
+          "win_chance": 24,
+          "record": "7-11",
+          "last10": "3-7",
+          "streak": "W3",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "BOS",
+          "city": "Boston",
+          "name": "Celtics",
+          "win_chance": 76,
+          "record": "11-6",
+          "last10": "6-4",
+          "streak": "L4",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600054",
+      "date": "2026-11-24",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Nuggets a heavy favorite 79% chance to win at home. Denver brings a 3-game winning streak into the matchup with a 10-5 record, while the Mavericks sit at 10-7.",
+      "draft": {
+        "headline": "Nuggets Face Mavericks in Denver",
+        "preview": "The model gives the Nuggets a heavy favorite 79% chance to win at home. Denver brings a 3-game winning streak into the matchup with a 10-5 record, while the Mavericks sit at 10-7."
+      },
+      "facts": {
+        "game_id": "0022600054",
+        "date": "2026-11-24",
+        "tipoff_et": "12:00 AM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "DEN",
+          "city": "Denver",
+          "name": "Nuggets",
+          "win_chance": 79,
+          "record": "10-5",
+          "last10": "7-3",
+          "streak": "W3",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "DAL",
+          "city": "Dallas",
+          "name": "Mavericks",
+          "win_chance": 21,
+          "record": "10-7",
+          "last10": "6-4",
+          "streak": "W3",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600055",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the 76ers a 64% chance to win at home. Philadelphia has a 14-4 record, while Miami enters on a 7-game win streak with an 8-2 last-10.",
+      "draft": {
+        "headline": "76ers host the Heat",
+        "preview": "The model gives the 76ers a 64% chance to win at home. Philadelphia has a 14-4 record, while Miami enters on a 7-game win streak with an 8-2 last-10."
+      },
+      "facts": {
+        "game_id": "0022600055",
+        "date": "2026-11-25",
+        "tipoff_et": "5:00 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "PHI",
+          "city": "Philadelphia",
+          "name": "76ers",
+          "win_chance": 64,
+          "record": "14-4",
+          "last10": "7-3",
+          "streak": "L1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "MIA",
+          "city": "Miami",
+          "name": "Heat",
+          "win_chance": 36,
+          "record": "10-6",
+          "last10": "8-2",
+          "streak": "W7",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600056",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Hornets a 68% chance against the Bulls. Charlotte holds a 4-12 record and a five-game losing streak, while Chicago sits at 5-12 with one straight win.",
+      "draft": {
+        "headline": "Hornets Host Bulls in Charlotte",
+        "preview": "The model gives the Hornets a 68% chance against the Bulls. Charlotte holds a 4-12 record and a five-game losing streak, while Chicago sits at 5-12 with one straight win."
+      },
+      "facts": {
+        "game_id": "0022600056",
+        "date": "2026-11-25",
+        "tipoff_et": "7:00 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "CHA",
+          "city": "Charlotte",
+          "name": "Hornets",
+          "win_chance": 68,
+          "record": "4-12",
+          "last10": "1-9",
+          "streak": "L5",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "CHI",
+          "city": "Chicago",
+          "name": "Bulls",
+          "win_chance": 32,
+          "record": "5-12",
+          "last10": "4-6",
+          "streak": "W1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600057",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Knicks a 66% chance against the Cavaliers. New York brings an 8-2 last-10 record and a five-game win streak into the game, while Cleveland sits at 9-9 on the season.",
+      "draft": {
+        "headline": "Knicks Host Cavaliers on November 25",
+        "preview": "The model gives the Knicks a 66% chance against the Cavaliers. New York brings an 8-2 last-10 record and a five-game win streak into the game, while Cleveland sits at 9-9 on the season."
+      },
+      "facts": {
+        "game_id": "0022600057",
+        "date": "2026-11-25",
+        "tipoff_et": "7:30 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "NYK",
+          "city": "New York",
+          "name": "Knicks",
+          "win_chance": 66,
+          "record": "11-6",
+          "last10": "8-2",
+          "streak": "W5",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "CLE",
+          "city": "Cleveland",
+          "name": "Cavaliers",
+          "win_chance": 34,
+          "record": "9-9",
+          "last10": "5-5",
+          "streak": "L1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600058",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Thunder a 64% chance against the Timberwolves. Oklahoma City holds a 10-8 record with a 4-6 last-10 and a two-game skid, while Minnesota sits at 13-5 with an 8-2 last-10 and two straight wins.",
+      "draft": {
+        "headline": "Thunder host Timberwolves in Oklahoma City",
+        "preview": "The model gives the Thunder a 64% chance against the Timberwolves. Oklahoma City holds a 10-8 record with a 4-6 last-10 and a two-game skid, while Minnesota sits at 13-5 with an 8-2 last-10 and two straight wins."
+      },
+      "facts": {
+        "game_id": "0022600058",
+        "date": "2026-11-25",
+        "tipoff_et": "7:30 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "OKC",
+          "city": "Oklahoma City",
+          "name": "Thunder",
+          "win_chance": 64,
+          "record": "10-8",
+          "last10": "4-6",
+          "streak": "L2",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "MIN",
+          "city": "Minnesota",
+          "name": "Timberwolves",
+          "win_chance": 36,
+          "record": "13-5",
+          "last10": "8-2",
+          "streak": "W2",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600059",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Grizzlies a 59% chance against the Clippers. Memphis holds a 13-5 record and is coming off a win, while LA has dropped 4 in a row at 4-12.",
+      "draft": {
+        "headline": "Grizzlies Host Clippers",
+        "preview": "The model gives the Grizzlies a 59% chance against the Clippers. Memphis holds a 13-5 record and is coming off a win, while LA has dropped 4 in a row at 4-12."
+      },
+      "facts": {
+        "game_id": "0022600059",
+        "date": "2026-11-25",
+        "tipoff_et": "8:00 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "MEM",
+          "city": "Memphis",
+          "name": "Grizzlies",
+          "win_chance": 59,
+          "record": "13-5",
+          "last10": "7-3",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "LAC",
+          "city": "LA",
+          "name": "Clippers",
+          "win_chance": 41,
+          "record": "4-12",
+          "last10": "3-7",
+          "streak": "L4",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600060",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Bucks a 65% chance at home. Milwaukee comes in with a 1-9 last-10 record and a 1-game win streak, while the Nets have lost 5 straight.",
+      "draft": {
+        "headline": "Bucks Host Nets",
+        "preview": "The model gives the Bucks a 65% chance at home. Milwaukee comes in with a 1-9 last-10 record and a 1-game win streak, while the Nets have lost 5 straight."
+      },
+      "facts": {
+        "game_id": "0022600060",
+        "date": "2026-11-25",
+        "tipoff_et": "8:00 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "MIL",
+          "city": "Milwaukee",
+          "name": "Bucks",
+          "win_chance": 65,
+          "record": "2-16",
+          "last10": "1-9",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "BKN",
+          "city": "Brooklyn",
+          "name": "Nets",
+          "win_chance": 35,
+          "record": "3-13",
+          "last10": "2-8",
+          "streak": "L5",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600061",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Rockets a 68% chance against the Suns. Houston holds a 13-5 record and is coming off a win with a W1 streak, while Phoenix brings an 8-2 last-10 record and a W4 streak.",
+      "draft": {
+        "headline": "Rockets Host Suns in Houston",
+        "preview": "The model gives the Rockets a 68% chance against the Suns. Houston holds a 13-5 record and is coming off a win with a W1 streak, while Phoenix brings an 8-2 last-10 record and a W4 streak."
+      },
+      "facts": {
+        "game_id": "0022600061",
+        "date": "2026-11-25",
+        "tipoff_et": "8:30 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "HOU",
+          "city": "Houston",
+          "name": "Rockets",
+          "win_chance": 68,
+          "record": "13-5",
+          "last10": "6-4",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "PHX",
+          "city": "Phoenix",
+          "name": "Suns",
+          "win_chance": 32,
+          "record": "9-7",
+          "last10": "8-2",
+          "streak": "W4",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600062",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Warriors a heavy favorite 77% chance to win. Golden State holds a 9-8 record and is on a W1 streak, while Sacramento comes in at 2-15 with a 1-9 last 10.",
+      "draft": {
+        "headline": "Warriors Host Kings",
+        "preview": "The model gives the Warriors a heavy favorite 77% chance to win. Golden State holds a 9-8 record and is on a W1 streak, while Sacramento comes in at 2-15 with a 1-9 last 10."
+      },
+      "facts": {
+        "game_id": "0022600062",
+        "date": "2026-11-25",
+        "tipoff_et": "10:00 PM ET",
+        "neutral_site": false,
+        "favorite": "home",
+        "home": {
+          "abbr": "GSW",
+          "city": "Golden State",
+          "name": "Warriors",
+          "win_chance": 77,
+          "record": "9-8",
+          "last10": "5-5",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "SAC",
+          "city": "Sacramento",
+          "name": "Kings",
+          "win_chance": 23,
+          "record": "2-15",
+          "last10": "1-9",
+          "streak": "L1",
+          "played_yesterday": false
+        }
+      }
+    },
+    {
+      "game_id": "0022600063",
+      "date": "2026-11-25",
+      "passed": true,
+      "problems": [],
+      "preview": "The model gives the Spurs a 56% chance against the Trail Blazers. San Antonio comes in hot with a 9-1 last-10 record and a 3-game win streak, while Portland sits at 11-6.",
+      "draft": {
+        "headline": "Spurs and Trail Blazers Clash in Portland",
+        "preview": "The model gives the Spurs a 56% chance against the Trail Blazers. San Antonio comes in hot with a 9-1 last-10 record and a 3-game win streak, while Portland sits at 11-6."
+      },
+      "facts": {
+        "game_id": "0022600063",
+        "date": "2026-11-25",
+        "tipoff_et": "10:00 PM ET",
+        "neutral_site": false,
+        "favorite": "away",
+        "home": {
+          "abbr": "POR",
+          "city": "Portland",
+          "name": "Trail Blazers",
+          "win_chance": 44,
+          "record": "11-6",
+          "last10": "5-5",
+          "streak": "W1",
+          "played_yesterday": false
+        },
+        "away": {
+          "abbr": "SAS",
+          "city": "San Antonio",
+          "name": "Spurs",
+          "win_chance": 56,
+          "record": "15-3",
+          "last10": "9-1",
+          "streak": "W3",
+          "played_yesterday": false
+        }
+      }
+    }
+  ]
+}
