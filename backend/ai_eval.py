@@ -28,12 +28,19 @@ LABELS = "labels.json"
 HISTORY = "history.json"
 SAVED_PREVIEWS = Path(__file__).parent / "PREVIEW_EVAL.json"
 
+# Rubric v2, revised after comparing v1's grades with 29 hand labels (see eval/JUDGE_EVAL.md).
 JUDGE_PROMPT = """You grade short game previews written for a basketball forecasting website read by casual fans.
 Answer "good" only if ALL of these hold:
 - Every claim agrees with the facts below; nothing is invented.
-- Plain English a casual fan understands: no codes like W6, no stats jargon, no filler such as "in this matchup".
+- No codes: any W or L followed by a number (W1, L4, W6) is a code and makes the preview bad, even if
+  the same fact is also written in words.
+- Plain English a casual fan understands. Short scene-setting phrases such as "in Denver" or "into the
+  game" are fine; only fail wording that is unclear (for example "a 3-game streak" without saying won or lost).
 - Useful: names the favorite with its win chance (or calls it a toss-up) and adds at least one record, last-10 or streak fact.
-- The wording matches the chance: "slight edge" or "close" only near 50-60%, "heavy favorite" only at 70% or more.
+- The wording matches the chance: "slight edge" or "close" only from 50% to 60% (a 63% or 64% favorite is
+  NOT a slight edge); "heavy favorite" only at 70% or more.
+- Not confusing: if the stats the preview mentions make the underdog look better than the favorite (better
+  record or better recent form) and the preview gives no reason for the pick, a fan would be confused: bad.
 Otherwise answer "bad". Give a one-sentence reason.
 
 Facts:
@@ -57,7 +64,20 @@ def judge_one(client, facts, text):
 
 
 def preview_text(draft):
-    return f"{draft.get('headline', '')}. {draft.get('preview', '')}".strip(". ")
+    headline, body = draft.get("headline", "").strip().rstrip("."), draft.get("preview", "").strip()
+    return f"{headline}. {body}" if headline else body
+
+
+def finished(text):
+    """Labels saved before a fix had their final period removed, which made them look cut off."""
+    text = text.strip()
+    return text if text.endswith((".", "!", "?")) else text + "."
+
+
+def rule_verdict(text, facts):
+    """'good' if the text passes the rule checks in previews.py, else 'bad'."""
+    headline, _, body = text.partition(". ")
+    return "good" if not previews.check(dict(headline=headline, preview=body), facts) else "bad"
 
 
 # ---------- agreement ----------
@@ -125,30 +145,47 @@ def judge(eval_dir, client):
     rows = []
     for game_id, item in labels.items():
         try:
-            verdict, reason = judge_one(client, item["facts"], item["text"])
+            verdict, reason = judge_one(client, item["facts"], finished(item["text"]))
         except QuotaError as error:
             print(f"{error}; stopping after {len(rows)}.", file=sys.stderr)
             break
         except Exception as error:
             print(f"{game_id}: request failed ({type(error).__name__}); skipped.", file=sys.stderr)
             continue
-        rows.append(dict(game_id=game_id, human=item["label"], judge=verdict, reason=reason, text=item["text"]))
+        rules = rule_verdict(finished(item["text"]), item["facts"])
+        combined = "good" if rules == "good" and verdict == "good" else "bad"
+        rows.append(dict(game_id=game_id, human=item["label"], judge=verdict, rules=rules, combined=combined,
+                         reason=reason, text=finished(item["text"])))
     stats = agreement([(r["human"], r["judge"]) for r in rows])
+    rules_stats = agreement([(r["human"], r["rules"]) for r in rows])
+    combined_stats = agreement([(r["human"], r["combined"]) for r in rows])
+
+    def fmt(st):
+        if not st["n"]:
+            return "n/a"
+        kappa = "n/a" if st["kappa"] is None else format(st["kappa"], ".2f")
+        return f"{st['agreement']:.0%} agreement, kappa {kappa} ({kappa_words(st['kappa'])})"
+
     lines = ["# AI judge vs. hand labels", "",
-             f"Judge model: `{client.model}`. Previews graded by both: {stats['n']}.", ""]
+             f"Judge model: `{client.model}`, rubric v2. Previews graded by both: {stats['n']}.", "",
+             "| Grader | Matches your labels |", "|---|---|",
+             f"| Rule checks alone | {fmt(rules_stats)} |",
+             f"| AI judge alone | {fmt(stats)} |",
+             f"| **Rules + judge** (good only if both say good, as production would use it) | **{fmt(combined_stats)}** |", "",
+             "Rubric v2 was written after reading v1's disagreements on these same labels, so these are development "
+             "results. A fair test needs new labels the rubric hasn't seen.", "",
+             "Kappa corrects for agreement you'd get by chance: 0 is no better than guessing, 1 is perfect."]
     if stats["n"]:
-        kappa_text = "n/a" if stats["kappa"] is None else f"{stats['kappa']:.2f}"
-        lines += [f"**Agreement: {stats['agreement']:.0%}. Cohen's kappa: {kappa_text} "
-                  f"({kappa_words(stats['kappa'])}).**", "",
-                  "Kappa corrects for agreement you'd get by chance: 0 is no better than guessing, 1 is perfect.", "",
-                  "| | Count |", "|---|---:|"] + [f"| {k} | {v} |" for k, v in sorted(stats["confusion"].items())]
-        disagreements = [r for r in rows if r["human"] != r["judge"]]
+        lines += ["", "Judge alone vs. you:", "", "| | Count |", "|---|---:|"] + \
+                 [f"| {k} | {v} |" for k, v in sorted(stats["confusion"].items())]
+        disagreements = [r for r in rows if r["human"] != r["combined"]]
         if disagreements:
-            lines += ["", "## Disagreements", ""] + [
-                f"- You: {r['human']}, judge: {r['judge']} ({r['reason']}) — \"{r['text']}\"" for r in disagreements]
+            lines += ["", "## Where rules + judge still disagree with you", ""] + [
+                f"- You: {r['human']}; rules: {r['rules']}, judge: {r['judge']} ({r['reason']}): \"{r['text']}\""
+                for r in disagreements]
     eval_dir.mkdir(parents=True, exist_ok=True)
     (eval_dir / "JUDGE_EVAL.md").write_text("\n".join(lines) + "\n")
-    (eval_dir / "judge_eval.json").write_text(json.dumps(dict(model=client.model, stats=stats, rows=rows), indent=2) + "\n")
+    (eval_dir / "judge_eval.json").write_text(json.dumps(dict(model=client.model, stats=stats, rules=rules_stats, combined=combined_stats, rows=rows), indent=2) + "\n")
     print("\n".join(lines))
     return 0
 
@@ -240,7 +277,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("label", help="Grade saved previews yourself")
-    commands.add_parser("judge", help="AI judge vs. your labels")
+    judge_cmd = commands.add_parser("judge", help="AI judge vs. your labels")
+    judge_cmd.add_argument("--model", help="Model to use as the judge (default: GEMINI_MODEL or the preview model)")
     cmp_ = commands.add_parser("compare", help="Compare model:prompt variants on the same games")
     cmp_.add_argument("--variants", nargs="+", required=True, help="model:prompt, current setup first")
     cmp_.add_argument("--limit", type=int, default=20)
@@ -258,7 +296,7 @@ def main(argv=None):
         print("Set GEMINI_API_KEY first.", file=sys.stderr)
         return 1
     if args.command == "judge":
-        return judge(args.eval_dir, Paced(GeminiClient(key)))
+        return judge(args.eval_dir, Paced(GeminiClient(key, args.model)))
     rows = list(read_ledger(args.live_dir / LEDGER_FILE).values())
     if args.command == "compare":
         compare(args.eval_dir, rows, key, args.variants, args.limit, args.judge)

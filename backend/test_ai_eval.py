@@ -68,8 +68,22 @@ class LabelAndJudgeTests(unittest.TestCase):
                                  dict(verdict="good", reason="fine")])
         self.assertEqual(ai_eval.judge(self.dir, client), 0)
         report = (self.dir / "JUDGE_EVAL.md").read_text()
-        self.assertIn("Agreement: 67%", report)
-        self.assertIn("Disagreements", report)
+        self.assertIn("| AI judge alone | 67% agreement", report)
+        self.assertIn("Rules + judge", report)
+        self.assertIn("still disagree", report)
+
+
+class TextTests(unittest.TestCase):
+    def test_preview_text_keeps_final_period(self):
+        self.assertEqual(ai_eval.preview_text(dict(headline="A at B", preview="The model likes A.")),
+                         "A at B. The model likes A.")
+        self.assertEqual(ai_eval.finished("Cut off"), "Cut off.")
+
+    def test_rule_verdict_catches_codes_in_saved_text(self):
+        facts = build_facts(ROWS[3], ROWS)
+        good = ai_eval.preview_text(GOOD)
+        self.assertEqual(ai_eval.rule_verdict(good, facts), "good")
+        self.assertEqual(ai_eval.rule_verdict(good.replace("Boston is 2-0", "Boston is W2 at 2-0"), facts), "bad")
 
 
 class CompareAndWeeklyTests(unittest.TestCase):

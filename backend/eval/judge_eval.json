@@ -1,0 +1,298 @@
+{
+  "model": "gemini-flash-lite-latest",
+  "stats": {
+    "n": 29,
+    "agreement": 0.8620689655172413,
+    "kappa": 0.7224880382775118,
+    "confusion": {
+      "you good, judge good": 14,
+      "you bad, judge bad": 11,
+      "you good, judge bad": 3,
+      "you bad, judge good": 1
+    }
+  },
+  "rules": {
+    "n": 29,
+    "agreement": 0.896551724137931,
+    "kappa": 0.7786259541984734,
+    "confusion": {
+      "you good, judge good": 17,
+      "you bad, judge bad": 9,
+      "you bad, judge good": 3
+    }
+  },
+  "combined": {
+    "n": 29,
+    "agreement": 0.8620689655172413,
+    "kappa": 0.7224880382775118,
+    "confusion": {
+      "you good, judge good": 14,
+      "you bad, judge bad": 11,
+      "you good, judge bad": 3,
+      "you bad, judge good": 1
+    }
+  },
+  "rows": [
+    {
+      "game_id": "0022600279",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the heavy favorite with an 82% win chance, includes accurate records and streak facts in plain English, and contains no codes or confusing logic.",
+      "text": "Celtics vs Kings Preview. The model makes the Celtics a heavy favorite with an 82% win chance against the Kings. Boston holds an 11-4 record and goes up against Sacramento, which sits at 1-14 with an eight-game losing streak."
+    },
+    {
+      "game_id": "0022600280",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the Hawks as a close 51 percent favorite, uses plain English without any forbidden codes, and accurately cites their recent record and winning streak.",
+      "text": "Hawks Host Pistons in Close Matchup. The model gives the Hawks a 51% chance against the Pistons in a close game. Atlanta is coming off a win with a 7-3 last-10 record and a 3-game winning streak."
+    },
+    {
+      "game_id": "0022600281",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview includes codes such as W1 and W6 for the streaks, which is not allowed.",
+      "text": "Thunder and Heat Face Off. The model gives the Thunder a 57% chance against the Heat. Oklahoma City holds a 10-6 record and is on a W1 streak, while Miami sits at 9-6 and is hot with an 8-2 last-10 record and W6 streak."
+    },
+    {
+      "game_id": "0022600282",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the Magic as a 66% favorite, avoids jargon and codes, states relevant records and streaks in plain English, and accurately reflects the provided facts.",
+      "text": "Magic Visit Wizards on November 22. The model gives the Magic a 66% chance against the Wizards. Orlando holds a 7-8 record and is coming off a win, while Washington sits at 6-11 with a two-game win streak."
+    },
+    {
+      "game_id": "0022600283",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the heavy favorite with the appropriate win chance, uses plain English without any codes, accurately reflects the provided facts, and provides useful context regarding recent streaks and records.",
+      "text": "Nuggets face Bulls in Chicago. The model gives the Nuggets a 72% chance to win as heavy favorites against the Bulls. Denver brings a two-game winning streak and a 7-3 record in their last ten games. Chicago holds a 4-11 record and comes in after a recent loss."
+    },
+    {
+      "game_id": "0022600284",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the favorite with its win chance, avoids codes, uses plain English, accurately reflects the facts, matches the wording to the 60% probability, and is not confusing.",
+      "text": "Jazz host Mavericks on November 22. The model gives the Mavericks a 60% chance against the Jazz. Dallas brings a 9-7 record and a two-game win streak, while Utah sits at 3-14."
+    },
+    {
+      "game_id": "0022600285",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview accurately reflects all facts, avoids codes, uses plain English, correctly identifies the heavy favorite at 85%, and provides clear records and streak details without causing any confusion.",
+      "text": "Knicks Host Pacers on November 22. The model makes the Knicks a heavy favorite with an 85% chance to win. New York brings an 8-2 last-10 record and a four-game win streak into the game. Indiana sits at 3-7 in its last 10 and has lost three straight."
+    },
+    {
+      "game_id": "0022600286",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview calls the 64% favorite a slight edge, which violates the rule that slight edge is only for 50% to 60%.",
+      "text": "Celtics visit Warriors with a slight edge. The model gives the Celtics a 64% chance against the Warriors. Boston holds an 11-5 record while Golden State enters with an 8-8 record and a 5-5 last-10."
+    },
+    {
+      "game_id": "0022600287",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview calls a 63 percent favorite a slight edge, but the rules state a slight edge is only for 50 percent to 60 percent.",
+      "text": "Hornets Host Grizzlies in Charlotte. The model gives the Hornets a slight edge with a 63% win chance at home. Charlotte holds a 4-11 record and is on a 4-game losing streak, while the Grizzlies sit at 12-5."
+    },
+    {
+      "game_id": "0022600288",
+      "human": "good",
+      "judge": "bad",
+      "rules": "good",
+      "combined": "bad",
+      "reason": "The preview describes a 64 percent favorite as a slight edge or close matchup? No, wait, the preview mentions the win chance but uses repetitive phrasing and fails to mention any stats for the underdog Trail Blazers.",
+      "text": "76ers host Trail Blazers with 64% win chance. The model gives the 76ers a 64% chance against the Trail Blazers. Philadelphia brings a five-game win streak into the home game with an 8-2 record in its last ten."
+    },
+    {
+      "game_id": "0022600289",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview includes prohibited codes such as L1 and L4.",
+      "text": "Thunder Visit Pacers. The model favors the Thunder as a heavy favorite with a 78% win chance over the Pacers. Oklahoma City is 10-7 on the season with an L1 streak, while Indiana sits at 5-12 with an L4 streak."
+    },
+    {
+      "game_id": "0022600290",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview includes forbidden team streak and record codes such as W1 and L13.",
+      "text": "Toronto Raptors host the Milwaukee Bucks. The model gives the Raptors a heavy favorite 76% chance at home. Toronto enters with a 6-10 record and a W1 streak, while Milwaukee sits at 1-16 with an L13 streak and 0-10 in its last 10."
+    },
+    {
+      "game_id": "0022600291",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview contains forbidden codes such as W1 and L4.",
+      "text": "Timberwolves Host Nets in Minnesota. The model gives the Timberwolves a heavy favorite 87% win chance at home against the Nets. Minnesota holds a 12-5 record and is coming off a win with a W1 streak. Meanwhile, Brooklyn sits at 3-12 and has dropped 4 in a row with an L4 streak."
+    },
+    {
+      "game_id": "0022600292",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the favorite with its win chance, uses plain English without any forbidden codes, and all stated facts are accurate according to the provided data.",
+      "text": "Cavaliers face Bulls on November 23. The model gives the Cavaliers a 66% chance to win. Cleveland brings a 5-5 record in their last ten games, while the Bulls carry a two-game losing streak and a 3-7 last-ten record."
+    },
+    {
+      "game_id": "0022600293",
+      "human": "bad",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the favorite with its win chance, avoids codes, uses plain English, aligns the phrasing with the 63% probability, and is fully supported by the facts.",
+      "text": "Suns visit Pelicans. The model gives the Suns a 63% chance to win with a 3-game streak. The Pelicans have lost 3 straight and hold a 1-9 record in their last 10 games."
+    },
+    {
+      "game_id": "0022600294",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the heavy favorite with the exact win chance, includes valid records and streaks in plain English without codes, and accurately reflects the facts.",
+      "text": "Rockets Host Clippers. The model gives the Rockets a heavy favorite 76% chance to win over the Clippers. Houston holds a 12-5 record and is 6-4 in its last 10, while LA is 4-11 with a 3-7 last-10 mark and a 3-game losing streak."
+    },
+    {
+      "game_id": "0022600295",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview contains forbidden codes like W1 and L2.",
+      "text": "Lakers Host Jazz. The model gives the Lakers a heavy favorite 91% chance to win over the Jazz. The Lakers hold a 14-3 record and a W1 streak, while the Jazz carry a 3-15 record and an L2 streak."
+    },
+    {
+      "game_id": "0022600296",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the heavy favorite, includes valid records and streaks without using prohibited codes, uses plain English, and correctly matches the 83% win chance to the term heavy favorite.",
+      "text": "Spurs face Kings in Sacramento. The model makes the Spurs a heavy favorite with an 83% chance to win. San Antonio brings a 14-3 record and a two-game win streak into Sacramento. The Kings hold a 2-14 record and went 2-8 in their last ten."
+    },
+    {
+      "game_id": "0022600052",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the 56 percent favorite, uses plain English without game codes, matches the slight edge wording appropriately, and accurately reflects the provided facts.",
+      "text": "Pistons and Magic Face Off in Orlando. The model gives the Pistons a 56% chance against the Magic. Detroit brings a 10-6 record and a two-game skid, while Orlando sits at 7-9 after a recent loss."
+    },
+    {
+      "game_id": "0022600054",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the heavy favorite with the appropriate win chance, uses plain English without forbidden codes, and aligns with all facts.",
+      "text": "Nuggets Face Mavericks in Denver. The model gives the Nuggets a heavy favorite 79% chance to win at home. Denver brings a 3-game winning streak into the matchup with a 10-5 record, while the Mavericks sit at 10-7."
+    },
+    {
+      "game_id": "0022600055",
+      "human": "good",
+      "judge": "bad",
+      "rules": "good",
+      "combined": "bad",
+      "reason": "The preview mentions that Miami enters on a 7-game win streak with an 8-2 last-10 while Philadelphia is 14-4 and lost its last game (L1), making the underdog look better in recent form without providing any reason for the 76ers pick.",
+      "text": "76ers host the Heat. The model gives the 76ers a 64% chance to win at home. Philadelphia has a 14-4 record, while Miami enters on a 7-game win streak with an 8-2 last-10."
+    },
+    {
+      "game_id": "0022600056",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "good",
+      "combined": "bad",
+      "reason": "The preview makes the underdog Bulls look better with a stronger recent form and record while picking the struggling Hornets, which would confuse a casual fan without explaining why.",
+      "text": "Hornets Host Bulls in Charlotte. The model gives the Hornets a 68% chance against the Bulls. Charlotte holds a 4-12 record and a five-game losing streak, while Chicago sits at 5-12 with one straight win."
+    },
+    {
+      "game_id": "0022600057",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview is accurate, uses plain English without codes, correctly identifies the favorite and its 66% chance, includes relevant record and streak facts, and avoids mismatched terminology.",
+      "text": "Knicks Host Cavaliers on November 25. The model gives the Knicks a 66% chance against the Cavaliers. New York brings an 8-2 last-10 record and a five-game win streak into the game, while Cleveland sits at 9-9 on the season."
+    },
+    {
+      "game_id": "0022600058",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "good",
+      "combined": "bad",
+      "reason": "The preview shows the underdog Timberwolves with a better record and recent form than the favorite Thunder without explaining why the Thunder are favored, which would confuse a casual fan.",
+      "text": "Thunder host Timberwolves in Oklahoma City. The model gives the Thunder a 64% chance against the Timberwolves. Oklahoma City holds a 10-8 record with a 4-6 last-10 and a two-game skid, while Minnesota sits at 13-5 with an 8-2 last-10 and two straight wins."
+    },
+    {
+      "game_id": "0022600059",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview correctly identifies the favorite with its win chance, uses plain English without any forbidden codes, accurately reflects the stats, and appropriately describes the 59% win chance as a close matchup.",
+      "text": "Grizzlies Host Clippers. The model gives the Grizzlies a 59% chance against the Clippers. Memphis holds a 13-5 record and is coming off a win, while LA has dropped 4 in a row at 4-12."
+    },
+    {
+      "game_id": "0022600060",
+      "human": "good",
+      "judge": "good",
+      "rules": "good",
+      "combined": "good",
+      "reason": "The preview is accurate, avoids all codes, names the correct favorite and win chance, uses appropriate phrasing, and clearly explains the teams' recent forms without causing confusion.",
+      "text": "Bucks Host Nets. The model gives the Bucks a 65% chance at home. Milwaukee comes in with a 1-9 last-10 record and a 1-game win streak, while the Nets have lost 5 straight."
+    },
+    {
+      "game_id": "0022600061",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview includes prohibited team streak codes such as W1 and W4.",
+      "text": "Rockets Host Suns in Houston. The model gives the Rockets a 68% chance against the Suns. Houston holds a 13-5 record and is coming off a win with a W1 streak, while Phoenix brings an 8-2 last-10 record and a W4 streak."
+    },
+    {
+      "game_id": "0022600062",
+      "human": "bad",
+      "judge": "bad",
+      "rules": "bad",
+      "combined": "bad",
+      "reason": "The preview includes the forbidden code 'W1'.",
+      "text": "Warriors Host Kings. The model gives the Warriors a heavy favorite 77% chance to win. Golden State holds a 9-8 record and is on a W1 streak, while Sacramento comes in at 2-15 with a 1-9 last 10."
+    },
+    {
+      "game_id": "0022600063",
+      "human": "good",
+      "judge": "bad",
+      "rules": "good",
+      "combined": "bad",
+      "reason": "The preview mentions a 3-game win streak for the Spurs, but the facts indicate a streak of W3, which contains a forbidden code format.",
+      "text": "Spurs and Trail Blazers Clash in Portland. The model gives the Spurs a 56% chance against the Trail Blazers. San Antonio comes in hot with a 9-1 last-10 record and a 3-game win streak, while Portland sits at 11-6."
+    }
+  ]
+}
